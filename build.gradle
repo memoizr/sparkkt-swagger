@@ -1,0 +1,42 @@
+buildscript {
+    ext.kotlin_version = '1.2.41'
+
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+group 'com.emoticast'
+version '1.0'
+
+apply plugin: 'kotlin'
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven { url "https://jitpack.io" }
+    maven { url "https://packagecloud.io/manusant/beerRepo/maven2" }
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    compile 'ch.qos.logback:logback-classic:1.1.7'
+    compile "com.sparkjava:spark-kotlin:1.0.0-alpha"
+    compile 'com.beerboy.ss:spark-swagger:1.0.0.47'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'khttp:khttp:0.1.0'
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'com.github.memoizr:assertk-core:1.0.0-beta.2'
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
