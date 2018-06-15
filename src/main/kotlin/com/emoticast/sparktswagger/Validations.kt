@@ -1,7 +1,7 @@
 package com.emoticast.sparktswagger
 
 object nonNegativeInt : Validator<Int> {
-    override val description = "positive integer"
+    override val description = "non negative integer"
     override val regex = """^\d+$""".toRegex()
 }
 

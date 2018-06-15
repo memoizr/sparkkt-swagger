@@ -8,13 +8,20 @@ val root = "home"
 val v1 = "v1"
 val clips = "clips"
 
-val clip = pathParam(name = "clips",
+val clipId = pathParam(
+        name = "clipId",
         condition = nonNegativeInt,
         description = "The clip id")
 
 val name = pathParam(name = "clips",
         condition = nonEmptyString,
         description = "The clip id")
+
+val query = queryParam(
+        name = "query",
+        description = "The query",
+        default = "",
+        condition = nonEmptyString)
 
 val length = queryParam(
         name = "length",
@@ -33,16 +40,16 @@ class ServerRouter(override val http: SparkSwagger) : Router {
     override fun registerRoutes() {
 
         "List all clips" GET
-                root / v1 / clips / clip with queries(length, offset) isHandledBy ::getClips
+                root / v1 / clips / clipId with queries(length, offset) isHandledBy ::getClips
 
         "Run a cute test" GET
-                v1 / clips / clip with queries(length, offset) isHandledBy ::getClips
+                v1 / clips / clipId with queries(length, offset) isHandledBy ::getClips
 
     }
 }
 
 fun getClips(request: Request, response: Response): AResponse {
-    return AResponse("x", request[offset])
+    return AResponse(request[clipId]!!, request[length], request[offset], request[query])
 }
 
-data class AResponse(val x: String, val y: Int?)
+data class AResponse(val clipId: Int, val length: Int, val offset: Int, val query: String)

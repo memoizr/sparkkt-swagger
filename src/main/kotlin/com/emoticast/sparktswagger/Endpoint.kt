@@ -5,7 +5,6 @@ import com.beerboy.ss.descriptor.EndpointDescriptor.endpointPath
 import com.beerboy.ss.descriptor.MethodDescriptor
 import com.beerboy.ss.descriptor.ParameterDescriptor
 import com.emoticast.extensions.json
-import com.emoticast.extensions.print
 import spark.Request
 import spark.Response
 
@@ -40,23 +39,29 @@ data class Endpoint(
                     pathParams.forEach { withPathParam(it.toParameterDescriptor()) }
                 }
 
-        val endpoint = swagger.endpoint(endpointPath(path), { a, b ->
-            a.print()
-            b.print()
-            null })
-
+        val endpoint = swagger.endpoint(endpointPath(path), { _, _ -> null })
         when (httpMethod) {
             HTTPMethod.GET -> {
                 endpoint.get(withResponseType, { request, response ->
                     val invalidParams = (pathParams.map {
                         val value = request.getPathParam(it)
-                        if (it.pattern.regex.matches(value.toString())) null else """path parameter "${it.name}" is invalid"""
+                        val path = "Path"
+                        when {
+                            it.required && value == null -> missingParameterMessage(path, it)
+                            !it.required && value == null -> null
+                            it.pattern.regex.matches(value.toString()) -> null
+                            else -> {
+                                invalidParameterMessage(path, it, value)
+                            }
+                        }
                     } + queryQueryParameters.map {
                         val value = request.getQueryParam(it)
+                        val query = "Query"
                         when {
+                            it.required && value == null -> missingParameterMessage(path, it)
                             !it.required && value == null -> null
-                            it.pattern.regex.matches(value?:"") -> null
-                            else -> """query parameter `${it.name}` is invalid, expecting ${it.pattern.description}, got `$value`"""
+                            it.pattern.regex.matches(value!!) -> null
+                            else -> invalidParameterMessage(query, it, value)
                         }
                     })
                             .filterNotNull()
@@ -74,6 +79,12 @@ data class Endpoint(
             else -> ""
         }
     }
+
+    fun missingParameterMessage(path: String, it: Parameter<*>) =
+            """Required $path parameter `${it.name}` is missing"""
+
+    fun invalidParameterMessage(query: String, it: Parameter<*>, value: String?) =
+            """$query parameter `${it.name}` is invalid, expecting ${it.pattern.description}, got `$value`"""
 }
 
 data class ClientError(val code: Int, val message: List<String>)
@@ -81,19 +92,21 @@ data class ClientError(val code: Int, val message: List<String>)
 fun Parameter<*>.toParameterDescriptor(): ParameterDescriptor = ParameterDescriptor.newBuilder()
         .withName(name)
         .withDescription("$description -- ${pattern.description}")
-        .withPattern(pattern.toString())
+        .withPattern(pattern.regex.toString())
         .withAllowEmptyValue(allowEmptyValues)
         .withRequired(required)
         .build()
 
 fun Request.getPathParam(param: PathParam<*>) = params(param.name)
-        .let { if (it != null && it.isEmpty()) null else it}
-fun Request.getQueryParam(param: QueryParam<*>) = queryParams(param.name)
-        .let { if (it != null && it.isEmpty()) null else it}
+        .let { if (it != null && it.isEmpty()) null else it }
 
-inline operator fun <reified T: Any> Request.get(param: PathParam<T>): T? = (params(param.name)
-        .let { if (it != null && it.isEmpty()) null else it}
+fun Request.getQueryParam(param: QueryParam<*>) = queryParams(param.name)
+        .let { if (it != null && it.isEmpty()) null else it }
+
+inline operator fun <reified T : Any> Request.get(param: PathParam<T>): T? = (params(param.name)
+        .let { if (it != null && it.isEmpty()) null else it }
         .let { if (T::class.java.isInstance(0)) it?.toInt() else it } ?: param.default) as T
-inline operator fun <reified T: Any> Request.get(param: QueryParam<T>): T = (queryParams(param.name)
-        .let { if (it != null && it.isEmpty()) null else it}
+
+inline operator fun <reified T : Any> Request.get(param: QueryParam<T>): T = (queryParams(param.name)
+        .let { if (it != null && it.isEmpty()) null else it }
         .let { if (T::class.java.isInstance(0)) it?.toInt() else it } ?: param.default) as T
