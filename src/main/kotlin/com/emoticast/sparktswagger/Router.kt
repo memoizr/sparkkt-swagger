@@ -2,6 +2,7 @@ package com.emoticast.sparktswagger
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
+import com.beerboy.ss.Config
 import com.beerboy.ss.SparkSwagger
 import org.slf4j.LoggerFactory
 import spark.Service
@@ -13,6 +14,9 @@ interface Router {
 
     infix fun String.GET(path: String) = Endpoint(HTTPMethod.GET, this, http, path, emptyList(), emptyList(), emptyList())
     infix fun String.GET(path: ParametrizedPath) = Endpoint(HTTPMethod.GET, this, http, path.path, path.pathParameters, emptyList(), emptyList())
+    infix fun String.POST(path: ParametrizedPath) = Endpoint(HTTPMethod.POST, this, http, path.path, path.pathParameters, emptyList(), emptyList())
+    infix fun String.PUT(path: ParametrizedPath) = Endpoint(HTTPMethod.PUT, this, http, path.path, path.pathParameters, emptyList(), emptyList())
+    infix fun String.DELETE(path: ParametrizedPath) = Endpoint(HTTPMethod.DELETE, this, http, path.path, path.pathParameters, emptyList(), emptyList())
 
     operator fun String.div(path: String) = this + "/" + path
     operator fun String.div(path: PathParam<out Any>) = ParametrizedPath(this + "/:" + path.name, listOf(path))
@@ -20,15 +24,15 @@ interface Router {
 
 class Server(val level: Level) {
     companion object {
-        val port: Int = 3000
+        const val port: Int = 3000
     }
 
-    fun start(router: (SparkSwagger)-> Router) {
-        val root = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
-        root.level = level
+    fun start(config: Config, router: (SparkSwagger)-> Router) {
+        val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
+        logger.level = level
 
         val http = Service.ignite().port(port)
-        val swagger = SparkSwagger.of(http)
+        val swagger = SparkSwagger.of(http, config)
         router(swagger).registerRoutes()
         swagger.generateDoc()
     }

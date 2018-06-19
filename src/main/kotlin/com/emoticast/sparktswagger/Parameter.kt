@@ -9,6 +9,13 @@ sealed class Parameter<T>(
         open val allowEmptyValues: Boolean = false
 )
 
+class HeaderParam<T>(override val name: String,
+                   override val pattern: Validator<T>,
+                   override val description: String,
+                   override val default: T? = null,
+                   override val required: Boolean = false,
+                   override val allowEmptyValues: Boolean = false) : Parameter<T>(name, pattern, description, default, required, allowEmptyValues)
+
 class PathParam<T>(val path: String? = null,
                 override val name: String,
                 override val pattern: Validator<T>,
@@ -45,12 +52,19 @@ fun <T> queryParam(name: String,
         required
 )
 
-fun <T> pathParam(name: String, description: String, condition: Validator<T>) = PathParam<T>(
+fun <T> headerParam(name: String, description: String, condition: Validator<T>) = HeaderParam(
+        name,
+        condition,
+        description,
+        null,
+        true,
+        true)
+
+fun <T> pathParam(name: String, description: String, condition: Validator<T>) = PathParam(
         null,
         name,
         condition,
         description,
         null,
         true,
-        true
-)
+        true)

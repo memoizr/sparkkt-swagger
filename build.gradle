@@ -23,10 +23,10 @@ repositories {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile 'ch.qos.logback:logback-classic:1.1.7'
-    compile "com.sparkjava:spark-kotlin:1.0.0-alpha"
-    compile 'com.beerboy.ss:spark-swagger:1.0.0.47'
+    compile 'com.github.Emoticast:spark-swagger:1.2.1'
+
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'khttp:khttp:0.1.0'
 
