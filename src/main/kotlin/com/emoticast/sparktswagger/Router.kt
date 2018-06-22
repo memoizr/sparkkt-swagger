@@ -12,17 +12,17 @@ interface Router {
 
     fun registerRoutes()
 
-    infix fun String.GET(path: String) = Endpoint(HTTPMethod.GET, this, http, path, emptyList(), emptyList(), emptyList())
-    infix fun String.GET(path: ParametrizedPath) = Endpoint(HTTPMethod.GET, this, http, path.path, path.pathParameters, emptyList(), emptyList())
+    infix fun String.GET(path: String) = Endpoint<Any>(HTTPMethod.GET, this, http, path, emptyList(), emptyList(), emptyList())
+    infix fun String.GET(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.GET, this, http, path.path, path.pathParameters, emptyList(), emptyList())
 
-    infix fun String.POST(path: ParametrizedPath) = Endpoint(HTTPMethod.POST, this, http, path.path, path.pathParameters, emptyList(), emptyList())
-    infix fun String.POST(path: String) = Endpoint(HTTPMethod.POST, this, http, path, emptyList(), emptyList(), emptyList())
+    infix fun String.POST(path: String) = Endpoint<Any>(HTTPMethod.POST, this, http, path, emptyList(), emptyList(), emptyList())
+    infix fun String.POST(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.POST, this, http, path.path, path.pathParameters, emptyList(), emptyList())
 
-    infix fun String.PUT(path: String) = Endpoint(HTTPMethod.PUT, this, http, path, emptyList(), emptyList(), emptyList())
-    infix fun String.PUT(path: ParametrizedPath) = Endpoint(HTTPMethod.PUT, this, http, path.path, path.pathParameters, emptyList(), emptyList())
+    infix fun String.PUT(path: String) = Endpoint<Any>(HTTPMethod.PUT, this, http, path, emptyList(), emptyList(), emptyList())
+    infix fun String.PUT(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.PUT, this, http, path.path, path.pathParameters, emptyList(), emptyList())
 
-    infix fun String.DELETE(path: String) = Endpoint(HTTPMethod.DELETE, this, http, path, emptyList(), emptyList(), emptyList())
-    infix fun String.DELETE(path: ParametrizedPath) = Endpoint(HTTPMethod.DELETE, this, http, path.path, path.pathParameters, emptyList(), emptyList())
+    infix fun String.DELETE(path: String) = Endpoint<Any>(HTTPMethod.DELETE, this, http, path, emptyList(), emptyList(), emptyList())
+    infix fun String.DELETE(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.DELETE, this, http, path.path, path.pathParameters, emptyList(), emptyList())
 
     operator fun String.div(path: String) = this + "/" + path
     operator fun String.div(path: PathParam<out Any>) = ParametrizedPath(this + "/:" + path.name, listOf(path))

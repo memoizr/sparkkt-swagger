@@ -5,6 +5,7 @@ import com.beerboy.ss.descriptor.EndpointDescriptor.endpointPath
 import com.beerboy.ss.descriptor.MethodDescriptor
 import com.beerboy.ss.descriptor.ParameterDescriptor
 import com.emoticast.extensions.json
+import com.emoticast.extensions.parseJson
 import spark.Request
 import spark.Response
 import kotlin.reflect.KClass
@@ -16,22 +17,39 @@ inline fun <reified T : Any> body() = Body(T::class)
 
 class Body<T : Any>(val klass: KClass<T>)
 
-data class Endpoint(
+
+typealias SomeBodyBundle<A, B> = Controller<A>.() -> B
+typealias NoBodyBundle<B> = Controller<Any>.() -> B
+
+data class Controller<T : Any>(val klass: KClass<T>?, val request: Request, val response: Response) {
+    val body: T by lazy { request.body()!!.parseJson(klass!!) }
+}
+
+data class Endpoint<B : Any>(
         val httpMethod: HTTPMethod,
         val description: String,
         val swagger: SparkSwagger,
-        private val paths: String,
+        val url: String,
         val pathParams: List<PathParam<out Any>>,
         val queryQueryParameters: List<QueryParam<*>>,
         val headerParams: List<HeaderParam<*>>,
-        val body: Body<*>? = null) {
+        val body: Body<B>? = null) {
 
-    val path by lazy { paths.split("/").dropLast(1).joinToString("/") }
-    val resourceName by lazy { "/" + paths.split("/").last() }
+    val path by lazy { url.split("/").dropLast(1).joinToString("/") }
+    val resourceName by lazy { "/" + url.split("/").last() }
 
     infix fun with(queryParameter: QueryParam<*>) = copy(queryQueryParameters = queryQueryParameters + queryParameter)
     infix fun with(params: HeaderParam<*>) = copy(headerParams = headerParams + params)
-    infix fun with(body: Body<*>) = copy(body = body)
+    infix fun <C : Any> with(body: Body<C>) = Endpoint(
+            httpMethod,
+            description,
+            swagger,
+            url,
+            pathParams,
+            queryQueryParameters,
+            headerParams,
+            body
+    )
 
     infix fun with(queryParameter: List<Parameter<*>>) = let {
         queryParameter.foldRight(this) { param, endpoint ->
@@ -43,7 +61,7 @@ data class Endpoint(
         }
     }
 
-    inline infix fun <reified T : Any> isHandledBy(noinline block: (Request, Response) -> T) {
+    inline infix fun <reified T : Any> isHandledBy(noinline block: Controller<B>.() -> T) {
         val withResponseType = MethodDescriptor.path(resourceName)
                 .withDescription(description)
                 .withResponseType(T::class)
@@ -60,61 +78,36 @@ data class Endpoint(
             if (invalidParams.isNotEmpty()) {
                 response.status(400)
                 invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }.let { ClientError(400, it).json }
-            } else block(request, response).json
+            } else block(Controller(body?.klass, request, response)).json
         }
         when (httpMethod) {
             HTTPMethod.GET -> endpoint.get(withResponseType, function)
             HTTPMethod.POST -> endpoint.post(withResponseType, function)
             HTTPMethod.PUT -> endpoint.put(withResponseType, function)
             HTTPMethod.DELETE -> endpoint.delete(withResponseType, function)
-            else -> ""
+            HTTPMethod.OPTIONS -> endpoint.options(withResponseType, function)
         }
     }
 
-    fun getInvalidParams(request: Request): List<String> {
-        val invalidParams = (pathParams.map {
-            val value = request.getPathParam(it)
-            val path = "Path"
-            when {
-                it.required && value == null -> missingParameterMessage(path, it)
-                !it.required && value == null -> null
-                it.pattern.regex.matches(value.toString()) -> null
-                else -> {
-                    invalidParameterMessage(path, it, value)
-                }
-            }
+    fun getInvalidParams(request: Request): List<String> =
+            (pathParams.map { validateParam(it, request.getPathParam(it), "Path") } +
+                    queryQueryParameters.map { validateParam(it, request.getQueryParam(it), "Query") } +
+                    headerParams.map { validateParam(it, request.getHeaderParam(it), "Header") })
+                    .filterNotNull()
+
+    private fun validateParam(it: Parameter<*>, value: String?, path: String): String? = when {
+        it.required && value == null -> missingParameterMessage(path, it)
+        !it.required && value == null -> null
+        it.pattern.regex.matches(value.toString()) -> null
+        else -> {
+            invalidParameterMessage(path, it, value)
         }
-                +
-                queryQueryParameters.map {
-                    val value = request.getQueryParam(it)
-                    val query = "Query"
-                    when {
-                        it.required && value == null -> missingParameterMessage(path, it)
-                        !it.required && value == null -> null
-                        it.pattern.regex.matches(value!!) -> null
-                        else -> invalidParameterMessage(query, it, value)
-                    }
-                }
-                +
-                headerParams.map {
-                    val value = request.getHeaderParam(it)
-                    val query = "Header"
-                    when {
-                        it.required && value == null -> missingParameterMessage(path, it)
-                        !it.required && value == null -> null
-                        it.pattern.regex.matches(value!!) -> null
-                        else -> invalidParameterMessage(query, it, value)
-                    }
-                }
-                )
-                .filterNotNull()
-        return invalidParams
     }
 
-    fun missingParameterMessage(path: String, it: Parameter<*>) =
+    private fun missingParameterMessage(path: String, it: Parameter<*>) =
             """Required $path parameter `${it.name}` is missing"""
 
-    fun invalidParameterMessage(query: String, it: Parameter<*>, value: String?) =
+    private fun invalidParameterMessage(query: String, it: Parameter<*>, value: String?) =
             """$query parameter `${it.name}` is invalid, expecting ${it.pattern.description}, got `$value`"""
 }
 

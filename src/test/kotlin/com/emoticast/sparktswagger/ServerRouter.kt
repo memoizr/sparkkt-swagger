@@ -40,20 +40,28 @@ class ServerRouter(override val http: SparkSwagger) : Router {
 
     override fun registerRoutes() {
 
+
+        val getParametrizedGreeting: SomeBodyBundle<RequestBody, String> = {  body.hello.plus("") }
+
+        val getGreeting: NoBodyBundle<String> = {
+            request[offset]
+            "hello"
+        }
+
         "List all clips" GET
-                root / v1 / clips / clipId with queries(length, offset) isHandledBy ::getClips
+                root / v1 / clips / clipId with body<RequestBody>() with queries(length, offset) isHandledBy getParametrizedGreeting
 
-        "Run a cute test" GET
-                v1 / clips / clipId with queries(length, offset) with headers(name) isHandledBy ::getClips
-
-        "Run a cute test 2" POST
-                v1 / clips / clipId with queries(length, offset) with headers(name) with body<RequestBody>() isHandledBy ::getClips
-
-        "Run a cute test 2" PUT
-                v1 / clips / clipId with queries(length, offset) with headers(name) isHandledBy ::getClips
-
-        "Run a cute test 2" DELETE
-                v1 / clips / clipId with queries(length, offset) with headers(name) isHandledBy ::getClips
+//        "Run a cute test" GET
+//                v1 / clips / clipId with queries(length, offset) with headers(name) isHandledBy ::getClips
+//
+//        "Run a cute test 2" POST
+//                v1 / clips / clipId with queries(length, offset) with headers(name) with body<RequestBody>() isHandledBy ::getClips
+//
+//        "Run a cute test 2" PUT
+//                v1 / clips / clipId with queries(length, offset) with headers(name) isHandledBy ::getClips
+//
+//        "Run a cute test 2" DELETE
+//                v1 / clips / clipId with queries(length, offset) with headers(name) isHandledBy ::getClips
 
         http.spark.get("/$root/docs") { request, response ->
             khttp.get("http://localhost:3000").text.print()}
