@@ -21,7 +21,11 @@ class Body<T : Any>(val klass: KClass<T>)
 typealias SomeBodyBundle<A, B> = Controller<A>.() -> B
 typealias NoBodyBundle<B> = Controller<Any>.() -> B
 
-data class Controller<T : Any>(val klass: KClass<T>?, val request: Request, val response: Response) {
+data class Controller<T : Any>(
+        val klass: KClass<T>?,
+        val request: Request,
+        val response: Response
+) {
     val body: T by lazy { request.body()!!.parseJson(klass!!) }
 }
 
@@ -135,5 +139,9 @@ inline operator fun <reified T : Any> Request.get(param: PathParam<T>): T? = (pa
         .let { if (T::class.java.isInstance(0)) it?.toInt() else it } ?: param.default) as T
 
 inline operator fun <reified T : Any> Request.get(param: QueryParam<T>): T = (queryParams(param.name)
+        .let { if (it != null && it.isEmpty()) null else it }
+        .let { if (T::class.java.isInstance(0)) it?.toInt() else it } ?: param.default) as T
+
+inline operator fun <reified T : Any> Request.get(param: HeaderParam<T>): T = (headers(param.name)
         .let { if (it != null && it.isEmpty()) null else it }
         .let { if (T::class.java.isInstance(0)) it?.toInt() else it } ?: param.default) as T
