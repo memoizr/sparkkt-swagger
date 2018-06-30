@@ -1,21 +1,50 @@
 package com.emoticast.sparktswagger
 
 import com.emoticast.extensions.json
+import com.emoticast.extensions.toHashMap
 import com.memoizr.assertk.expect
 import org.json.JSONObject
 
 object whenPerform {
     infix fun GET(endpoint: String): Expectation {
-        return Expectation(endpoint)
+        return Expectation(HttpMethod.GET, endpoint)
     }
 
-    class Expectation(
+    infix fun POST(endpoint: String): Expectation {
+        return Expectation(HttpMethod.POST, endpoint)
+    }
+
+    infix fun DELETE(endpoint: String): Expectation {
+        return Expectation(HttpMethod.DELETE, endpoint)
+    }
+
+    infix fun PUT(endpoint: String): Expectation {
+        return Expectation(HttpMethod.PUT, endpoint)
+    }
+
+    enum class HttpMethod {
+        POST, GET, PUT, DELETE;
+    }
+
+    data class Expectation(
+            private val method: HttpMethod,
             private val endpoint: String,
-            headers: Map<String, String> = emptyMap()) {
+            private val headers: Map<String, String> = emptyMap(),
+            private val body: Any? = null
+    ) {
 
-        private val response = khttp.get("http://localhost:${Server.port}$endpoint", headers = headers)
+        private val response by lazy {
+            when (method) {
+                HttpMethod.GET -> khttp.get("http://localhost:${Server.port}$endpoint", headers = headers, json = body?.toHashMap())
+                whenPerform.HttpMethod.POST -> khttp.post("http://localhost:${Server.port}$endpoint", headers = headers, json = body?.toHashMap())
+                whenPerform.HttpMethod.PUT -> khttp.put("http://localhost:${Server.port}$endpoint", headers = headers, json = body?.toHashMap())
+                whenPerform.HttpMethod.DELETE -> khttp.delete("http://localhost:${Server.port}$endpoint", headers = headers, json = body?.toHashMap())
+            }
+        }
 
-        infix fun withHeaders(headers: Map<String, String>) = Expectation(endpoint, headers)
+        infix fun withBody(body: Any) = copy(body = body)
+
+        infix fun withHeaders(headers: Map<String, Any?>) = copy(headers = headers.map { it.key to it.value.toString() }.toMap())
 
         infix fun expectBody(body: String) = apply {
             expect that response.text isEqualTo body
@@ -30,3 +59,4 @@ object whenPerform {
         }
     }
 }
+

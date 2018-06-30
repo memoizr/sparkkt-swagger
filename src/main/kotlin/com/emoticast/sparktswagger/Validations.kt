@@ -10,7 +10,19 @@ object nonEmptyString : Validator<String> {
     override val regex = """^\w+$""".toRegex()
 }
 
+object optionalNonEmptyString : Validator<String?> {
+    override val description = "non empty string"
+    override val regex = """^\w+$""".toRegex()
+}
+
+object nonEmptyStringList : Validator<List<String>> {
+    override val description = "non empty string list"
+    override val regex = """^(\w+,?)*\w+$""".toRegex()
+}
+
 interface Validator<T> {
     val regex: Regex
     val description: String
+
+    fun optional(): Validator<T?> = this as Validator<T?>
 }

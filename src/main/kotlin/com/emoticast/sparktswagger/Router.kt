@@ -12,34 +12,40 @@ interface Router {
 
     fun registerRoutes()
 
-    infix fun String.GET(path: String) = Endpoint<Any>(HTTPMethod.GET, this, http, path, emptyList(), emptyList(), emptyList())
-    infix fun String.GET(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.GET, this, http, path.path, path.pathParameters, emptyList(), emptyList())
+    infix fun String.GET(path: String) = Endpoint<Any>(HTTPMethod.GET, this, http, path.leadingSlash, emptyList(), emptyList(), emptyList())
+    infix fun String.GET(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.GET, this, http, path.path.leadingSlash, path.pathParameters, emptyList(), emptyList())
 
-    infix fun String.POST(path: String) = Endpoint<Any>(HTTPMethod.POST, this, http, path, emptyList(), emptyList(), emptyList())
-    infix fun String.POST(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.POST, this, http, path.path, path.pathParameters, emptyList(), emptyList())
+    infix fun String.POST(path: String) = Endpoint<Any>(HTTPMethod.POST, this, http, path.leadingSlash, emptyList(), emptyList(), emptyList())
+    infix fun String.POST(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.POST, this, http, path.path.leadingSlash, path.pathParameters, emptyList(), emptyList())
 
-    infix fun String.PUT(path: String) = Endpoint<Any>(HTTPMethod.PUT, this, http, path, emptyList(), emptyList(), emptyList())
-    infix fun String.PUT(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.PUT, this, http, path.path, path.pathParameters, emptyList(), emptyList())
+    infix fun String.PUT(path: String) = Endpoint<Any>(HTTPMethod.PUT, this, http, path.leadingSlash, emptyList(), emptyList(), emptyList())
+    infix fun String.PUT(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.PUT, this, http, path.path.leadingSlash, path.pathParameters, emptyList(), emptyList())
 
-    infix fun String.DELETE(path: String) = Endpoint<Any>(HTTPMethod.DELETE, this, http, path, emptyList(), emptyList(), emptyList())
-    infix fun String.DELETE(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.DELETE, this, http, path.path, path.pathParameters, emptyList(), emptyList())
+    infix fun String.DELETE(path: String) = Endpoint<Any>(HTTPMethod.DELETE, this, http, path.leadingSlash, emptyList(), emptyList(), emptyList())
+    infix fun String.DELETE(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.DELETE, this, http, path.path.leadingSlash, path.pathParameters, emptyList(), emptyList())
 
-    operator fun String.div(path: String) = this + "/" + path
+    operator fun String.div(path: String) = this.leadingSlash + "/" + path
     operator fun String.div(path: PathParam<out Any>) = ParametrizedPath(this + "/:" + path.name, listOf(path))
 }
+
+val String.leadingSlash get() = if (!startsWith("/")) "/" + this else this
 
 class Server(val level: Level) {
     companion object {
         const val port: Int = 3000
     }
+    val http by lazy {   Service.ignite().port(port) }
 
     fun start(config: Config, router: (SparkSwagger)-> Router) {
         val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
         logger.level = level
 
-        val http = Service.ignite().port(port)
         val swagger = SparkSwagger.of(http, config)
         router(swagger).registerRoutes()
         swagger.generateDoc()
+    }
+
+    fun stop() {
+        http.stop()
     }
 }

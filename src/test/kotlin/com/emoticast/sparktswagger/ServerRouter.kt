@@ -1,12 +1,11 @@
 package com.emoticast.sparktswagger
 
 import com.beerboy.ss.SparkSwagger
-import com.emoticast.extensions.print
 import spark.Request
 import spark.Response
 
 val root = "home"
-val v1 = "v1"
+val v1 = "/v1"
 val clips = "clips"
 
 val clipId = pathParam(
@@ -18,19 +17,19 @@ val name = headerParam(name = "clips",
         condition = nonEmptyString,
         description = "The clip id")
 
-val query = queryParam(
+private val query = optionalQueryParam(
         name = "query",
+        default = "978",
         description = "The query",
-        default = "",
         condition = nonEmptyString)
 
-val length = queryParam(
+private val length = optionalQueryParam(
         name = "length",
         description = "The number of items returned in the page",
         default = 20,
         condition = nonNegativeInt)
 
-val offset = queryParam(
+private val offset = optionalQueryParam(
         name = "offset",
         description = "The offset from the first item",
         default = 0,
@@ -41,15 +40,17 @@ class ServerRouter(override val http: SparkSwagger) : Router {
     override fun registerRoutes() {
 
 
-        val getParametrizedGreeting: SomeBodyBundle<RequestBody, String> = {  body.hello.plus("") }
+        val getParametrizedGreeting: SomeBodyBundle<RequestBody, String> = { body.hello.plus("").ok }
 
         val getGreeting: NoBodyBundle<String> = {
-            request[offset]
-            "hello"
+            request[query]
+            "hello".ok
         }
 
+        "hello" GET "hey" isHandledBy getGreeting
+
         "List all clips" GET
-                root / v1 / clips / clipId with body<RequestBody>() with queries(length, offset) isHandledBy getParametrizedGreeting
+                v1 / clips / clipId with queries(length, offset, query) isHandledBy getGreeting
 
 //        "Run a cute test" GET
 //                v1 / clips / clipId with queries(length, offset) with headers(name) isHandledBy ::getClips
@@ -63,18 +64,11 @@ class ServerRouter(override val http: SparkSwagger) : Router {
 //        "Run a cute test 2" DELETE
 //                v1 / clips / clipId with queries(length, offset) with headers(name) isHandledBy ::getClips
 
-        http.spark.get("/$root/docs") { request, response ->
-            khttp.get("http://localhost:3000").text.print()}
-
-        http.spark.get("/$root/:star") { request, response ->
-            val p = request.params(":star") ?: ""
-            khttp.get("http://localhost:3000/$p").text.print()}
-
     }
 }
 
 fun getClips(request: Request, response: Response): AResponse {
-    return AResponse(request[clipId]!!, request[length], request[offset], listOf(Query(request[query])), FooEnum.A)
+    return AResponse(request[clipId], request[length], request[offset], listOf(Query(request[query])), FooEnum.A)
 }
 
 enum class FooEnum{

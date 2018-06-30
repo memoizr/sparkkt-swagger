@@ -1,6 +1,7 @@
 package com.emoticast.extensions
 
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import org.eclipse.jetty.util.UrlEncoded
 import kotlin.reflect.KClass
 
@@ -13,7 +14,9 @@ fun <T : Any?> T.print(): T = this.apply {
     println("$this at $className.$methodName($fileName:$lineNumber)")
 }
 
+val gson = GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ").create()
 val Any.json: String get() = Gson().toJson(this)
+fun Any.toHashMap() = gson.fromJson(json, Map::class.java)
 val String.urlEncoded: String get() = UrlEncoded.encodeString(this)
 inline fun <reified T : Any> String.parseJson() :T  = Gson().fromJson(this, T::class.java)
 fun <T : Any> String.parseJson(klass: KClass<T>) :T  = Gson().fromJson(this, klass.java)
