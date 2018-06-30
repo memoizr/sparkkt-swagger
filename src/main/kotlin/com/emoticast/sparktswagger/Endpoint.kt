@@ -10,8 +10,8 @@ import spark.Request
 import spark.Response
 import kotlin.reflect.KClass
 
-fun queries(vararg queryParameter: QueryParam<*>) = queryParameter.asList()
-fun headers(vararg headerParameter: HeaderParam<*>) = headerParameter.asList()
+fun queries(vararg queryParameter: QueryParameter<*>) = queryParameter.asList()
+fun headers(vararg headerParameter: HeaderParameter<*>) = headerParameter.asList()
 
 inline fun <reified T : Any> body() = Body(T::class)
 
@@ -35,15 +35,15 @@ data class Endpoint<B : Any>(
         val swagger: SparkSwagger,
         val url: String,
         val pathParams: List<PathParam<out Any>>,
-        val queryParams: List<QueryParam<*>>,
-        val headerParams: List<HeaderParam<*>>,
+        val queryParams: List<QueryParameter<*>>,
+        val headerParams: List<HeaderParameter<*>>,
         val body: Body<B>? = null) {
 
     val path by lazy { url.split("/").dropLast(1).joinToString("/") }
     val resourceName by lazy { "/" + url.split("/").last() }
 
-    infix fun with(queryParameter: QueryParam<*>) = copy(queryParams = queryParams + queryParameter)
-    infix fun with(params: HeaderParam<*>) = copy(headerParams = headerParams + params)
+    infix fun with(queryParameter: QueryParameter<*>) = copy(queryParams = queryParams + queryParameter)
+    infix fun with(params: HeaderParameter<*>) = copy(headerParams = headerParams + params)
     infix fun <C : Any> with(body: Body<C>) = Endpoint(
             httpMethod,
             description,
@@ -58,12 +58,13 @@ data class Endpoint<B : Any>(
     infix fun with(queryParameter: List<Parameter<*>>) = let {
         queryParameter.foldRight(this) { param, endpoint ->
             when (param) {
-                is HeaderParam -> endpoint with param
-                is QueryParam -> endpoint with param
+                is HeaderParameter -> endpoint with param
+                is QueryParameter -> endpoint with param
                 else -> throw IllegalArgumentException(param.toString())
             }
         }
     }
+
     inline infix fun <reified T : Any> isHandledBy(noinline block: Controller<B>.() -> HttpResponse<T>) {
         val withResponseType = MethodDescriptor.path(resourceName)
                 .withDescription(description)
@@ -129,30 +130,30 @@ fun Parameter<*>.toParameterDescriptor(): ParameterDescriptor = ParameterDescrip
         .withName(name)
         .withDescription("$description -- ${pattern.description}")
         .withPattern(pattern.regex.toString())
-        .withAllowEmptyValue(allowEmptyValues)
+        .withAllowEmptyValue(emptyAsMissing)
         .withRequired(required)
         .build()
 
 fun Request.getPathParam(param: PathParam<*>) = params(param.name)
-        .let { if (it != null && it.isEmpty()) null else it }
+        .let { if (it != null && param.emptyAsMissing && it.isEmpty()) null else it }
 
-fun Request.getQueryParam(param: QueryParam<*>) = queryParams(param.name)
-        .let { if (it != null && it.isEmpty()) null else it }
+fun Request.getQueryParam(param: QueryParameter<*>) = queryParams(param.name)
+        .let { if (it != null && param.emptyAsMissing && it.isEmpty()) null else it }
 
-fun Request.getHeaderParam(param: HeaderParam<*>) = headers(param.name)
-        .let { if (it != null && it.isEmpty()) null else it }
+fun Request.getHeaderParam(param: HeaderParameter<*>) = headers(param.name)
+        .let { if (it != null && param.emptyAsMissing && it.isEmpty()) null else it }
 
-inline operator fun <reified T : Any> Request.get(param: PathParam<T>): T = (params(param.name)
-        .let { if (it != null && it.isEmpty()) null else it }
-        .let { if (T::class.java.isInstance(0)) it?.toInt() else it } ?: param.default) as T
+inline operator fun <reified T : Any> Request.get(param: PathParam<T>): T = params(param.name).let { param.pattern.parse(it) }
 
-inline operator fun <reified T : Any?> Request.get(param: QueryParam<T>): T = (queryParams(param.name)
-        .let { if (it != null && it.isEmpty()) null else it }
-        .let { if (T::class.java.isInstance(0)) it?.toInt() else it } ?: param.default) as T
+inline operator fun <reified T : Any?> Request.get(param: QueryParam<T>): T = queryParams(param.name).let { param.pattern.parse(it) }
+inline operator fun <reified T : Any?> Request.get(param: OptionalQueryParam<T>): T = queryParams(param.name)
+        ?.let { if (param.emptyAsMissing && it.isEmpty()) null else it }
+        ?.let { param.pattern.parse(it) } ?: param.default
 
-inline operator fun <reified T : Any?> Request.get(param: HeaderParam<T>): T = (headers(param.name)
-        .let { if (it != null && it.isEmpty()) null else it }
-        .let { if (T::class.java.isInstance(0)) it?.toInt() else it } ?: param.default) as T
+inline operator fun <reified T : Any?> Request.get(param: HeaderParam<T>): T = headers(param.name).let { param.pattern.parse(it) }
+inline operator fun <reified T : Any?> Request.get(param: OptionalHeaderParam<T>): T = headers(param.name)
+        ?.let { if (param.emptyAsMissing && it.isEmpty()) null else it }
+        ?.let { param.pattern.parse(it) } ?: param.default
 
 sealed class HttpResponse<T> {
     abstract val code: Int
@@ -166,11 +167,12 @@ val <T> T.created: HttpResponse<T> get() = SuccessfulHttpResponse(201, this)
 
 fun <T> badRequest(message: String, code: Int = 400) = ErrorHttpResponse<T>(code, listOf(message))
 fun <T> forbidden(message: String) = ErrorHttpResponse<T>(403, listOf(message))
+fun <T> notFound() = ErrorHttpResponse<T>(403, listOf("not found"))
 
 data class SuccessfulHttpResponse<T>(override val code: Int,
-                                val body: T) : HttpResponse<T>()
+                                     val body: T) : HttpResponse<T>()
 
 data class ErrorHttpResponse<T>(override val code: Int,
-                           val message: List<String>): HttpResponse<T>()
+                                val message: List<String>) : HttpResponse<T>()
 
 
