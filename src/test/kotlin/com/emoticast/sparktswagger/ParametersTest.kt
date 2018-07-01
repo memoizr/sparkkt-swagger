@@ -35,17 +35,12 @@ object DateValidator : Validator<Date> {
     override val description: String = "An iso 8601 format date"
     override val regex: Regex = """^(?:[1-9]\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:Z|[+-][01]\d:[0-5]\d)$""".toRegex()
     override val parse: (String) -> Date = { SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").parse(it) }
-
 }
 
 class ParametersTest {
     @Rule
     @JvmField
-    val rule = SparkTestRule { TestRouter(it) }
-
-    class TestRouter(override val http: SparkSwagger) : Router {
-
-        override fun registerRoutes() {
+    val rule = SparkTestRule {
             "" GET "stringpath" / stringParam isHandledBy { TestResult(request[stringParam]).ok }
             "" GET "intpath" / intparam isHandledBy { IntTestResult(request[intparam]).ok }
 
@@ -65,7 +60,6 @@ class ParametersTest {
 
             "" GET "customParsing" with queries(time) isHandledBy {
                 DateResult(request[time]).ok }
-        }
     }
 
     @Test

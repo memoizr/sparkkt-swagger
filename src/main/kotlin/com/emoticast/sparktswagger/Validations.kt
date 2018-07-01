@@ -12,15 +12,17 @@ object nonEmptyString : Validator<String> {
     override val parse: (String) -> String = { it }
 }
 
-//object optionalNonEmptyString : Validator<String?> {
-//    override val description = "non empty string"
-//    override val regex = """^\w+$""".toRegex()
-//}
-//
-//object nonEmptyStringList : Validator<List<String>> {
-//    override val description = "non empty string list"
-//    override val regex = """^(\w+,?)*\w+$""".toRegex()
-//}
+object nonEmptyStringSet : Validator<Set<String>> {
+    override val description = "non empty string set"
+    override val regex = """^(\w+,?)*\w+$""".toRegex()
+    override val parse: (String) -> Set<String> = { it.split(",").toSet() }
+}
+
+object stringSet : Validator<Set<String>> {
+    override val description = "string set"
+    override val regex = """^\w*$""".toRegex()
+    override val parse: (String) -> Set<String> = { it.split(",").toSet() }
+}
 
 interface Validator<T> {
     val regex: Regex

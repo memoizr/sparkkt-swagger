@@ -1,6 +1,5 @@
 package com.emoticast.sparktswagger
 
-import com.beerboy.ss.SparkSwagger
 import spark.Request
 import spark.Response
 
@@ -35,22 +34,18 @@ private val offset = optionalQueryParam(
         default = 0,
         condition = nonNegativeInt)
 
-class ServerRouter(override val http: SparkSwagger) : Router {
+val ServerRouter: Router.() -> Unit = {
+    val getParametrizedGreeting: SomeBodyBundle<RequestBody, String> = { body.hello.plus("").ok }
 
-    override fun registerRoutes() {
+    val getGreeting: NoBodyBundle<String> = {
+        request[query]
+        "hello".ok
+    }
 
+    "hello" GET "hey" isHandledBy getGreeting
 
-        val getParametrizedGreeting: SomeBodyBundle<RequestBody, String> = { body.hello.plus("").ok }
-
-        val getGreeting: NoBodyBundle<String> = {
-            request[query]
-            "hello".ok
-        }
-
-        "hello" GET "hey" isHandledBy getGreeting
-
-        "List all clips" GET
-                v1 / clips / clipId with queries(length, offset, query) isHandledBy getGreeting
+    "List all clips" GET
+            v1 / clips / clipId with queries(length, offset, query) isHandledBy getGreeting
 
 //        "Run a cute test" GET
 //                v1 / clips / clipId with queries(length, offset) with headers(name) isHandledBy ::getClips
@@ -64,14 +59,13 @@ class ServerRouter(override val http: SparkSwagger) : Router {
 //        "Run a cute test 2" DELETE
 //                v1 / clips / clipId with queries(length, offset) with headers(name) isHandledBy ::getClips
 
-    }
 }
 
 fun getClips(request: Request, response: Response): AResponse {
     return AResponse(request[clipId], request[length], request[offset], listOf(Query(request[query])), FooEnum.A)
 }
 
-enum class FooEnum{
+enum class FooEnum {
     A, B, C, D
 }
 

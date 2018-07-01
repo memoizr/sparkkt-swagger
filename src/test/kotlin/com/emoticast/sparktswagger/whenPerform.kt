@@ -35,10 +35,10 @@ object whenPerform {
 
         private val response by lazy {
             when (method) {
-                HttpMethod.GET -> khttp.get("http://localhost:${Server.port}$endpoint", headers = headers, json = body?.toHashMap())
-                whenPerform.HttpMethod.POST -> khttp.post("http://localhost:${Server.port}$endpoint", headers = headers, json = body?.toHashMap())
-                whenPerform.HttpMethod.PUT -> khttp.put("http://localhost:${Server.port}$endpoint", headers = headers, json = body?.toHashMap())
-                whenPerform.HttpMethod.DELETE -> khttp.delete("http://localhost:${Server.port}$endpoint", headers = headers, json = body?.toHashMap())
+                HttpMethod.GET -> khttp.get("http://localhost:${config.port}$endpoint", headers = headers, json = body?.toHashMap())
+                whenPerform.HttpMethod.POST -> khttp.post("http://localhost:${config.port}$endpoint", headers = headers, json = body?.toHashMap())
+                whenPerform.HttpMethod.PUT -> khttp.put("http://localhost:${config.port}$endpoint", headers = headers, json = body?.toHashMap())
+                whenPerform.HttpMethod.DELETE -> khttp.delete("http://localhost:${config.port}$endpoint", headers = headers, json = body?.toHashMap())
             }
         }
 

@@ -1,16 +1,12 @@
 package com.emoticast.sparktswagger
 
-import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import com.beerboy.ss.Config
 import com.beerboy.ss.SparkSwagger
 import org.slf4j.LoggerFactory
 import spark.Service
 
-interface Router {
-    val http: SparkSwagger
-
-    fun registerRoutes()
+class Router(val http: SparkSwagger) {
 
     infix fun String.GET(path: String) = Endpoint<Any>(HTTPMethod.GET, this, http, path.leadingSlash, emptyList(), emptyList(), emptyList())
     infix fun String.GET(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.GET, this, http, path.path.leadingSlash, path.pathParameters, emptyList(), emptyList())
@@ -30,19 +26,17 @@ interface Router {
 
 val String.leadingSlash get() = if (!startsWith("/")) "/" + this else this
 
-class Server(val level: Level) {
-    companion object {
-        const val port: Int = 3000
-    }
-    val http by lazy {   Service.ignite().port(port) }
+class Server(val config: Config) {
+    val http by lazy {   Service.ignite().port(config.port) }
 
-    fun start(config: Config, router: (SparkSwagger)-> Router) {
+
+    fun startWithRoutes(router: Router.()-> Unit): SparkSwagger {
         val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
-        logger.level = level
+        logger.level = config.logLevel
 
         val swagger = SparkSwagger.of(http, config)
-        router(swagger).registerRoutes()
-        swagger.generateDoc()
+        router(Router(swagger))
+        return swagger
     }
 
     fun stop() {

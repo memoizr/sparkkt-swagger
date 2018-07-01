@@ -2,39 +2,44 @@ package com.emoticast.sparktswagger
 
 import ch.qos.logback.classic.Level
 import com.beerboy.ss.Config
-import com.beerboy.ss.SparkSwagger
-import com.emoticast.sparktswagger.Server.Companion.port
 import org.junit.rules.ExternalResource
+import org.junit.runner.Description
+import org.junit.runners.model.Statement
+import java.net.BindException
+import java.net.ConnectException
+import java.util.*
 
 val config = Config(description = "A test",
         basePath = "",
         title = "Test",
-        host = "localhost:$port",
+        port = 3000,
+        logLevel = Level.INFO,
+        host = "localhost:3000",
         docPath = "/doc",
         serviceName = "/$root")
 
-open class SparkTestRule(val router: (SparkSwagger) -> Router = { ServerRouter(it) }) : ExternalResource() {
-    val server = Server(Level.INFO)
+open class SparkTestRule(val router: Router.() -> Unit = ServerRouter) : ExternalResource() {
+    val server = Server(config.copy(port = Random().nextInt(5000) + 2000))
+
+    override fun apply(base: Statement, description: Description): Statement {
+        return object : Statement() {
+            override fun evaluate() {
+                before()
+                try {
+                    base.evaluate()
+                } catch (b: BindException) {
+                    apply(base, description)
+                } catch (e: ConnectException) {
+                    apply(base, description)
+                } finally {
+                    after()
+                }
+
+            }
+        }
+    }
+
     override fun before() {
-
-        server.start(config, router)
-
-        while (!isConnected()) {
-            Thread.sleep(100)
-        }
-    }
-
-    override fun after() {
-        server.stop()
-        super.after()
-    }
-
-    private fun isConnected(): Boolean {
-        return try {
-            khttp.get("http://localhost:${Server.port}/")
-            true
-        } catch (e: Exception) {
-            false
-        }
+        server.startWithRoutes(router)
     }
 }
