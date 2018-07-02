@@ -67,7 +67,7 @@ data class Endpoint<B : Any>(
 
     inline infix fun <reified T : Any> isHandledBy(noinline block: Controller<B>.() -> HttpResponse<T>) {
         val withResponseType = MethodDescriptor.path(resourceName)
-                .withDescription(description)
+                .withSummary(description)
                 .withResponseType(T::class)
                 .apply {
                     body?.let { withRequestType(it.klass) }
