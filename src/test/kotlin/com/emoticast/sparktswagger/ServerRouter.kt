@@ -1,8 +1,5 @@
 package com.emoticast.sparktswagger
 
-import spark.Request
-import spark.Response
-
 val root = "home"
 val v1 = "/v1"
 val clips = "clips"
@@ -61,9 +58,9 @@ val ServerRouter: Router.() -> Unit = {
 
 }
 
-fun getClips(request: Request, response: Response): AResponse {
-    return AResponse(request[clipId], request[length], request[offset], listOf(Query(request[query])), FooEnum.A)
-}
+//fun getClips(request: Request, response: Response): AResponse {
+//    return AResponse(request[clipId], request[length], request[offset], listOf(Query(request[query])), FooEnum.A)
+//}
 
 enum class FooEnum {
     A, B, C, D

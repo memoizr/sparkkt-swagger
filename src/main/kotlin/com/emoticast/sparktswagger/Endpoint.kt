@@ -23,20 +23,53 @@ typealias NoBodyBundle<B> = Controller<Any>.() -> HttpResponse<B>
 
 data class Controller<T : Any>(
         val klass: KClass<T>?,
+        val params: Set<Parameter<*>>,
         val request: Request,
         val response: Response
 ) {
     val body: T by lazy { request.body()!!.parseJson(klass!!) }
+
+
+    inline operator fun <reified T : Any> Request.get(param: PathParam<T>): T =
+            checkParamIsRegistered(param)
+                    .params(param.name)
+                    .let { param.pattern.parse(it) }
+
+    inline operator fun <reified T : Any?> Request.get(param: QueryParam<T>): T =
+            checkParamIsRegistered(param)
+                    .queryParams(param.name)
+                    .let { param.pattern.parse(it) }
+
+    inline operator fun <reified T : Any?> Request.get(param: OptionalQueryParam<T>): T =
+            checkParamIsRegistered(param)
+                    .queryParams(param.name)
+                    .filterValid(param)
+                    ?.let { param.pattern.parse(it) } ?: param.default
+
+    inline operator fun <reified T : Any?> Request.get(param: HeaderParam<T>): T =
+            checkParamIsRegistered(param)
+                    .headers(param.name)
+                    .let { param.pattern.parse(it) }
+
+    inline operator fun <reified T : Any?> Request.get(param: OptionalHeaderParam<T>): T =
+            checkParamIsRegistered(param)
+                    .headers(param.name)
+                    .filterValid(param)
+                    ?.let { param.pattern.parse(it) } ?: param.default
+
+    fun Request.checkParamIsRegistered(param: Parameter<*>) = if (!params.contains(param)) throw UnregisteredParamException(param) else this
 }
+
+data class UnregisteredParamException(val param: Parameter<*>) : Throwable()
 
 data class Endpoint<B : Any>(
         val httpMethod: HTTPMethod,
         val description: String,
         val swagger: SparkSwagger,
         val url: String,
-        val pathParams: List<PathParam<out Any>>,
-        val queryParams: List<QueryParameter<*>>,
-        val headerParams: List<HeaderParameter<*>>,
+        val pathParams: Set<PathParam<out Any>>,
+        val queryParams: Set<QueryParameter<*>>,
+        val headerParams: Set<HeaderParameter<*>>,
         val body: Body<B>? = null) {
 
     val path by lazy { url.split("/").dropLast(1).joinToString("/") }
@@ -82,12 +115,23 @@ data class Endpoint<B : Any>(
             if (invalidParams.isNotEmpty()) {
                 response.status(400)
                 invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }.let { ClientError(400, it).json }
-            } else block(Controller(body?.klass, request, response)).let {
-                response.status(it.code)
-                when (it) {
-                    is SuccessfulHttpResponse -> it.body.json
-                    is ErrorHttpResponse -> it.json
+            } else try {
+                block(Controller(body?.klass, (headerParams + queryParams + pathParams), request, response)).let {
+                    response.status(it.code)
+                    when (it) {
+                        is SuccessfulHttpResponse -> it.body.json
+                        is ErrorHttpResponse -> it.json
+                    }
                 }
+            } catch (unregisteredException: UnregisteredParamException) {
+                val param = unregisteredException.param
+
+                val type = when (param) {
+                    is HeaderParameter -> "header"
+                    is QueryParameter -> "query"
+                    is PathParam -> "path"
+                }
+                ErrorHttpResponse<T>(500, listOf("Attempting to use unregistered $type parameter `${param.name}`")).json
             }
         }
         when (httpMethod) {
@@ -128,7 +172,7 @@ data class ClientError(val code: Int, val message: List<String>)
 
 fun Parameter<*>.toParameterDescriptor(): ParameterDescriptor = ParameterDescriptor.newBuilder()
         .withName(name)
-        .withDescription("""$description -- ${pattern.description}${if(emptyAsMissing) " -- Empty as Missing" else ""}${if (invalidAsMissing) " -- Invalid as Missing" else ""}""")
+        .withDescription("""$description -- ${pattern.description}${if (emptyAsMissing) " -- Empty as Missing" else ""}${if (invalidAsMissing) " -- Invalid as Missing" else ""}""")
         .withPattern(pattern.regex.toString())
         .withAllowEmptyValue(emptyAsMissing)
         .withRequired(required)
@@ -154,18 +198,6 @@ fun String?.filterValid(param: Parameter<*>) = when {
     param.invalidAsMissing && !param.pattern.regex.matches(this) -> null
     else -> this
 }
-
-inline operator fun <reified T : Any> Request.get(param: PathParam<T>): T = params(param.name).let { param.pattern.parse(it) }
-
-inline operator fun <reified T : Any?> Request.get(param: QueryParam<T>): T = queryParams(param.name).let { param.pattern.parse(it) }
-inline operator fun <reified T : Any?> Request.get(param: OptionalQueryParam<T>): T = queryParams(param.name)
-        .filterValid(param)
-        ?.let { param.pattern.parse(it) } ?: param.default
-
-inline operator fun <reified T : Any?> Request.get(param: HeaderParam<T>): T = headers(param.name).let { param.pattern.parse(it) }
-inline operator fun <reified T : Any?> Request.get(param: OptionalHeaderParam<T>): T = headers(param.name)
-        .filterValid(param)
-        ?.let { param.pattern.parse(it) } ?: param.default
 
 sealed class HttpResponse<T> {
     abstract val code: Int

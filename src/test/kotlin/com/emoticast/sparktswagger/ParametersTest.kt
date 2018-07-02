@@ -26,7 +26,10 @@ val limit = optionalQueryParam(name = "limit", description = "description", cond
 val qHead = headerParam(name = "q", description = "description", condition = NonEmptyString)
 val intHead = headerParam(name = "int", description = "description", condition = NonNegativeInt)
 val offsetHead = optionalHeaderParam(name = "offsetHead", description = "description", condition = NonNegativeInt, default = 666, emptyAsMissing = true)
-val limitHead = optionalHeaderParam(name = "limitHead", description = "description", condition = NonNegativeInt, emptyAsMising = true)
+val limitHead = optionalHeaderParam(name = "limitHead", description = "description", condition = NonNegativeInt, emptyAsMissing = true)
+val queryParam = optionalQueryParam(name="param", description = "parameter", condition = NonEmptyString, default = "hey")
+val headerParam = optionalHeaderParam(name="param", description = "parameter", condition = NonEmptyString, default = "hey")
+val pathParam = pathParam(name="param", description = "parameter", condition = NonEmptyString)
 
 val time = queryParam("time", description = "the time", condition = DateValidator)
 
@@ -36,29 +39,32 @@ object DateValidator : Validator<Date> {
     override val parse: (String) -> Date = { SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").parse(it) }
 }
 
-class ParametersTest: SparkTest() {
+class ParametersTest : SparkTest() {
     @Rule
     @JvmField
     val rule = SparkTestRule(port) {
-            "" GET "stringpath" / stringParam isHandledBy { TestResult(request[stringParam]).ok }
-            "" GET "intpath" / intparam isHandledBy { IntTestResult(request[intparam]).ok }
+        "" GET "stringpath" / stringParam isHandledBy { TestResult(request[stringParam]).ok }
+        "" GET "intpath" / intparam isHandledBy { IntTestResult(request[intparam]).ok }
 
-            "" GET "intpath2" / intparam / "end" isHandledBy {
-                IntTestResult(request[intparam]).ok
-            }
+        "" GET "intpath2" / intparam / "end" isHandledBy {
+            IntTestResult(request[intparam]).ok
+        }
 
-            "" GET "queriespath" with queries(q) isHandledBy { TestResult(request[q]).ok }
-            "" GET "queriespath2" with queries(int) isHandledBy { IntTestResult(request[int]).ok }
-            "" GET "queriespath3" with queries(offset) isHandledBy { IntTestResult(request[offset]).ok }
-            "" GET "queriespath4" with queries(limit) isHandledBy { NullableIntTestResult(request[limit]).ok }
+        "" GET "queriespath" with queries(q) isHandledBy { TestResult(request[q]).ok }
+        "" GET "queriespath2" with queries(int) isHandledBy { IntTestResult(request[int]).ok }
+        "" GET "queriespath3" with queries(offset) isHandledBy { IntTestResult(request[offset]).ok }
+        "" GET "queriespath4" with queries(limit) isHandledBy { NullableIntTestResult(request[limit]).ok }
 
-            "" GET "headerspath" with headers(qHead) isHandledBy { TestResult(request[qHead]).ok }
-            "" GET "headerspath2" with headers(intHead) isHandledBy { IntTestResult(request[intHead]).ok }
-            "" GET "headerspath3" with headers(offsetHead) isHandledBy { NullableIntTestResult(request[offsetHead]).ok }
-            "" GET "headerspath4" with headers(limitHead) isHandledBy { NullableIntTestResult(request[limitHead]).ok }
+        "" GET "headerspath" with headers(qHead) isHandledBy { TestResult(request[qHead]).ok }
+        "" GET "headerspath2" with headers(intHead) isHandledBy { IntTestResult(request[intHead]).ok }
+        "" GET "headerspath3" with headers(offsetHead) isHandledBy { NullableIntTestResult(request[offsetHead]).ok }
+        "" GET "headerspath4" with headers(limitHead) isHandledBy { NullableIntTestResult(request[limitHead]).ok }
 
-            "" GET "customParsing" with queries(time) isHandledBy {
-                DateResult(request[time]).ok }
+        "" GET "customParsing" with queries(time) isHandledBy { DateResult(request[time]).ok }
+
+        "" GET "sneakyqueryparams" isHandledBy { TestResult(request.get(queryParam)).ok }
+        "" GET "sneakyheaderparams" isHandledBy { TestResult(request.get(headerParam)).ok }
+        "" GET "sneakypathparams/:path" isHandledBy { TestResult(request.get(pathParam)).ok }
     }
 
     @Test
@@ -123,6 +129,13 @@ class ParametersTest: SparkTest() {
         val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
         val date = "2018-06-30T02:59:51-00:00"
         whenPerform GET "/$root/customParsing?time=$date" expectBody DateResult(df.parse(date)).json
+    }
+
+    @Test
+    fun `forbids using parameters which aren't registered`() {
+        whenPerform GET "/$root/sneakyqueryparams" expectBody ErrorHttpResponse<TestResult>(500, listOf("Attempting to use unregistered query parameter `param`")).json
+        whenPerform GET "/$root/sneakyheaderparams" expectBody ErrorHttpResponse<TestResult>(500, listOf("Attempting to use unregistered header parameter `param`")).json
+        whenPerform GET "/$root/sneakypathparams/343" expectBody ErrorHttpResponse<TestResult>(500, listOf("Attempting to use unregistered path parameter `param`")).json
     }
 
     data class IntTestResult(val result: Int)

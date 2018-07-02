@@ -8,20 +8,20 @@ import spark.Service
 
 class Router(val http: SparkSwagger) {
 
-    infix fun String.GET(path: String) = Endpoint<Any>(HTTPMethod.GET, this, http, path.leadingSlash, emptyList(), emptyList(), emptyList())
-    infix fun String.GET(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.GET, this, http, path.path.leadingSlash, path.pathParameters, emptyList(), emptyList())
+    infix fun String.GET(path: String) = Endpoint<Any>(HTTPMethod.GET, this, http, path.leadingSlash, emptySet(), emptySet(), emptySet())
+    infix fun String.GET(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.GET, this, http, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet())
 
-    infix fun String.POST(path: String) = Endpoint<Any>(HTTPMethod.POST, this, http, path.leadingSlash, emptyList(), emptyList(), emptyList())
-    infix fun String.POST(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.POST, this, http, path.path.leadingSlash, path.pathParameters, emptyList(), emptyList())
+    infix fun String.POST(path: String) = Endpoint<Any>(HTTPMethod.POST, this, http, path.leadingSlash, emptySet(), emptySet(), emptySet())
+    infix fun String.POST(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.POST, this, http, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet())
 
-    infix fun String.PUT(path: String) = Endpoint<Any>(HTTPMethod.PUT, this, http, path.leadingSlash, emptyList(), emptyList(), emptyList())
-    infix fun String.PUT(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.PUT, this, http, path.path.leadingSlash, path.pathParameters, emptyList(), emptyList())
+    infix fun String.PUT(path: String) = Endpoint<Any>(HTTPMethod.PUT, this, http, path.leadingSlash, emptySet(), emptySet(), emptySet())
+    infix fun String.PUT(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.PUT, this, http, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet())
 
-    infix fun String.DELETE(path: String) = Endpoint<Any>(HTTPMethod.DELETE, this, http, path.leadingSlash, emptyList(), emptyList(), emptyList())
-    infix fun String.DELETE(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.DELETE, this, http, path.path.leadingSlash, path.pathParameters, emptyList(), emptyList())
+    infix fun String.DELETE(path: String) = Endpoint<Any>(HTTPMethod.DELETE, this, http, path.leadingSlash, emptySet(), emptySet(), emptySet())
+    infix fun String.DELETE(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.DELETE, this, http, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet())
 
     operator fun String.div(path: String) = this.leadingSlash + "/" + path
-    operator fun String.div(path: PathParam<out Any>) = ParametrizedPath(this + "/:" + path.name, listOf(path))
+    operator fun String.div(path: PathParam<out Any>) = ParametrizedPath(this + "/:" + path.name, setOf(path))
 }
 
 val String.leadingSlash get() = if (!startsWith("/")) "/" + this else this
