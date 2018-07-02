@@ -128,7 +128,7 @@ data class ClientError(val code: Int, val message: List<String>)
 
 fun Parameter<*>.toParameterDescriptor(): ParameterDescriptor = ParameterDescriptor.newBuilder()
         .withName(name)
-        .withDescription("""$description -- ${pattern.description}${if(emptyAsMissing) "-- Empty as Missing" else ""}${if (invalidAsMissing) "-- Invalid as Missing" else ""}""")
+        .withDescription("""$description -- ${pattern.description}${if(emptyAsMissing) " -- Empty as Missing" else ""}${if (invalidAsMissing) " -- Invalid as Missing" else ""}""")
         .withPattern(pattern.regex.toString())
         .withAllowEmptyValue(emptyAsMissing)
         .withRequired(required)
