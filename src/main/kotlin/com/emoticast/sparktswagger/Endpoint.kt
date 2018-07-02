@@ -15,10 +15,10 @@ fun headers(vararg headerParameter: HeaderParameter<*>) = headerParameter.asList
 
 inline fun <reified T : Any> body() = Body(T::class)
 
-class Body<T : Any>(val klass: KClass<T>)
+data class Body<T : Any>(val klass: KClass<T>)
 
 
-typealias Controller<A, B> = Bundle<A>.() -> HttpResponse<B>
+typealias Controller<BODY_TYPE, RESPONSE_TYPE> = Bundle<BODY_TYPE>.() -> HttpResponse<RESPONSE_TYPE>
 
 data class Bundle<T : Any>(
         val klass: KClass<T>?,
@@ -69,7 +69,7 @@ data class Endpoint<B : Any>(
         val pathParams: Set<PathParam<out Any>>,
         val queryParams: Set<QueryParameter<*>>,
         val headerParams: Set<HeaderParameter<*>>,
-        val body: Body<B>? = null) {
+        val body: Body<B>) {
 
     val path by lazy { url.split("/").dropLast(1).joinToString("/") }
     val resourceName by lazy { "/" + url.split("/").last() }
@@ -102,7 +102,9 @@ data class Endpoint<B : Any>(
                 .withSummary(description)
                 .withResponseType(T::class)
                 .apply {
-                    body?.let { withRequestType(it.klass) }
+                    if (body.klass != Nothing::class) {
+                        withRequestType(body.klass)
+                    }
                     headerParams.forEach { withHeaderParam(it.toParameterDescriptor()) }
                     queryParams.forEach { withQueryParam(it.toParameterDescriptor()) }
                     pathParams.forEach { withPathParam(it.toParameterDescriptor()) }
