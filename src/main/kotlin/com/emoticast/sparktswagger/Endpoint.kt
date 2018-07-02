@@ -137,11 +137,15 @@ fun Parameter<*>.toParameterDescriptor(): ParameterDescriptor = ParameterDescrip
 fun Request.getPathParam(param: PathParam<*>) = params(param.name)
         .let { if (it != null && param.emptyAsMissing && it.isEmpty()) null else it }
 
-fun Request.getQueryParam(param: QueryParameter<*>) = queryParams(param.name)
-        .let { if (it != null && param.emptyAsMissing && it.isEmpty()) null else it }
+fun Request.getQueryParam(param: QueryParameter<*>) = queryParams(param.name).filterValid(param)
+fun Request.getHeaderParam(param: HeaderParameter<*>) = headers(param.name).filterValid(param)
 
-fun Request.getHeaderParam(param: HeaderParameter<*>) = headers(param.name)
-        .let { if (it != null && param.emptyAsMissing && it.isEmpty()) null else it }
+private fun String?.filterValid(param: Parameter<*>) = when {
+    this == null -> null
+    param.emptyAsMissing && this.isEmpty() -> null
+    param.invalidAsMissing && !param.pattern.regex.matches(this) -> null
+    else -> this
+}
 
 inline operator fun <reified T : Any> Request.get(param: PathParam<T>): T = params(param.name).let { param.pattern.parse(it) }
 

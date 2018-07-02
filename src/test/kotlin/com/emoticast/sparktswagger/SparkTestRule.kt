@@ -7,7 +7,6 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import java.net.BindException
 import java.net.ConnectException
-import java.util.*
 
 val config = Config(description = "A test",
         basePath = "",
@@ -18,22 +17,25 @@ val config = Config(description = "A test",
         docPath = "/doc",
         serviceName = "/$root")
 
-open class SparkTestRule(val router: Router.() -> Unit = ServerRouter) : ExternalResource() {
-    val server = Server(config.copy(port = Random().nextInt(5000) + 2000))
+open class SparkTestRule(val port: Int, val router: Router.() -> Unit = ServerRouter) : ExternalResource() {
+    val server = Server(config.copy(port = port))
 
     override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {
             override fun evaluate() {
                 before()
-                try {
-                    base.evaluate()
-                } catch (b: BindException) {
-                    apply(base, description)
-                } catch (e: ConnectException) {
-                    apply(base, description)
-                } finally {
-                    after()
+                fun go() {
+                    try {
+                        base.evaluate()
+                    } catch (b: BindException) {
+                        go()
+                    } catch (e: ConnectException) {
+                        go()
+                    } finally {
+                        after()
+                    }
                 }
+                go()
 
             }
         }

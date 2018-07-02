@@ -3,11 +3,11 @@ package com.emoticast.sparktswagger
 import org.junit.Rule
 import org.junit.Test
 
-class SimplePathBuilderTest {
+class SimplePathBuilderTest: SparkTest() {
 
     @Rule
     @JvmField
-    val rule = SparkTestRule {
+    val rule = SparkTestRule(port) {
         "foo" GET "/foo" isHandledBy { TestResult("get value").ok }
         "foo" PUT "/foo" isHandledBy { TestResult("put value").created }
         "foo" POST "/foo" isHandledBy { TestResult("post value").created }
@@ -55,7 +55,7 @@ class SimplePathBuilderTest {
         whenPerform GET "/$root/infixslash/bar" expectBodyJson TestResult("success") expectCode 200
         whenPerform PUT "/$root/infixslash/bar" expectBodyJson TestResult("success") expectCode 200
         whenPerform POST "/$root/infixslash/bar" expectBodyJson TestResult("success") expectCode 200
-        whenPerform DELETE "/$root/infixslash/bar" expectBodyJson TestResult("success") expectCode 201
+        whenPerform DELETE "/$root/infixslash/bar" expectBodyJson TestResult("success") expectCode 200
     }
 }
 

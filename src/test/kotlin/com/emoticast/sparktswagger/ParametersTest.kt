@@ -37,10 +37,10 @@ object DateValidator : Validator<Date> {
     override val parse: (String) -> Date = { SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").parse(it) }
 }
 
-class ParametersTest {
+class ParametersTest: SparkTest() {
     @Rule
     @JvmField
-    val rule = SparkTestRule {
+    val rule = SparkTestRule(port) {
             "" GET "stringpath" / stringParam isHandledBy { TestResult(request[stringParam]).ok }
             "" GET "intpath" / intparam isHandledBy { IntTestResult(request[intparam]).ok }
 

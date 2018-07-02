@@ -4,22 +4,27 @@ import com.emoticast.extensions.json
 import com.emoticast.extensions.toHashMap
 import com.memoizr.assertk.expect
 import org.json.JSONObject
+import java.util.*
 
-object whenPerform {
+abstract class SparkTest {
+    protected val whenPerform = this
+
+    protected val port = Random().nextInt(5000) + 2000
+
     infix fun GET(endpoint: String): Expectation {
-        return Expectation(HttpMethod.GET, endpoint)
+        return Expectation(port, HttpMethod.GET, endpoint)
     }
 
     infix fun POST(endpoint: String): Expectation {
-        return Expectation(HttpMethod.POST, endpoint)
+        return Expectation(port, HttpMethod.POST, endpoint)
     }
 
     infix fun DELETE(endpoint: String): Expectation {
-        return Expectation(HttpMethod.DELETE, endpoint)
+        return Expectation(port, HttpMethod.DELETE, endpoint)
     }
 
     infix fun PUT(endpoint: String): Expectation {
-        return Expectation(HttpMethod.PUT, endpoint)
+        return Expectation(port, HttpMethod.PUT, endpoint)
     }
 
     enum class HttpMethod {
@@ -27,6 +32,7 @@ object whenPerform {
     }
 
     data class Expectation(
+            val port: Int,
             private val method: HttpMethod,
             private val endpoint: String,
             private val headers: Map<String, String> = emptyMap(),
@@ -35,10 +41,10 @@ object whenPerform {
 
         private val response by lazy {
             when (method) {
-                HttpMethod.GET -> khttp.get("http://localhost:${config.port}$endpoint", headers = headers, json = body?.toHashMap())
-                whenPerform.HttpMethod.POST -> khttp.post("http://localhost:${config.port}$endpoint", headers = headers, json = body?.toHashMap())
-                whenPerform.HttpMethod.PUT -> khttp.put("http://localhost:${config.port}$endpoint", headers = headers, json = body?.toHashMap())
-                whenPerform.HttpMethod.DELETE -> khttp.delete("http://localhost:${config.port}$endpoint", headers = headers, json = body?.toHashMap())
+                HttpMethod.GET -> khttp.get("http://localhost:${port}$endpoint", headers = headers, json = body?.toHashMap())
+                HttpMethod.POST -> khttp.post("http://localhost:${port}$endpoint", headers = headers, json = body?.toHashMap())
+                HttpMethod.PUT -> khttp.put("http://localhost:${port}$endpoint", headers = headers, json = body?.toHashMap())
+                HttpMethod.DELETE -> khttp.delete("http://localhost:${port}$endpoint", headers = headers, json = body?.toHashMap())
             }
         }
 

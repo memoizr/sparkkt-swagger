@@ -4,17 +4,27 @@ import com.emoticast.extensions.json
 import org.junit.Rule
 import org.junit.Test
 
-class ValidationsTest {
+class ValidationsTest: SparkTest() {
+
+    val id = pathParam("id", "the id", nonNegativeInt)
+    val offset = optionalQueryParam("offset", "offset", condition = nonNegativeInt, default = 20, emptyAsMissing = true)
+    val allowInvalidQuery = optionalQueryParam("allowInvalidQuery", "allowInvalid", condition = nonNegativeInt, default = 20, emptyAsMissing = true, invalidAsMissing = true)
+    val allowInvalidHeader = optionalHeaderParam("allowInvalidHeader", "allowInvalid", condition = nonNegativeInt, default = 20, emptyAsMissing = true, invalidAsMissing = true)
 
     @Rule
-    @JvmField val rule = SparkTestRule()
+    @JvmField val rule = SparkTestRule(port) {
+        "" GET "foo" / id with queries(offset, allowInvalidQuery) with headers(allowInvalidHeader) isHandledBy { "ok".ok }
+    }
 
     @Test
     fun `validates routes`() {
 
-//        whenPerform GET "/" expectCode 200
-        whenPerform GET "/$root/v1/clips/3456" expectCode 200
-        whenPerform GET "/$root/v1/clips/hey" expectBody ClientError(400, listOf("""Path parameter `clipId` is invalid, expecting non negative integer, got `hey`""")).json expectCode 400
-        whenPerform GET "/$root/v1/clips/134?offset=-34" expectBody ClientError(400, listOf("""Query parameter `offset` is invalid, expecting non negative integer, got `-34`""")).json expectCode 400
+        whenPerform GET "/$root/foo/3456" expectCode 200
+        whenPerform GET "/$root/foo/hey" expectBody ClientError(400, listOf("""Path parameter `id` is invalid, expecting non negative integer, got `hey`""")).json expectCode 400
+        whenPerform GET "/$root/foo/134?offset=-34" expectBody ClientError(400, listOf("""Query parameter `offset` is invalid, expecting non negative integer, got `-34`""")).json expectCode 400
+        whenPerform GET "/$root/foo/134?offset=a" expectBody ClientError(400, listOf("""Query parameter `offset` is invalid, expecting non negative integer, got `a`""")).json expectCode 400
+        whenPerform GET "/$root/foo/134?allowInvalidQuery=a" expectCode 200
+        whenPerform GET "/$root/foo/134" withHeaders mapOf(allowInvalidHeader.name to "boo") expectCode 200
     }
 }
+
