@@ -135,9 +135,9 @@ fun Parameter<*>.toParameterDescriptor(): ParameterDescriptor = ParameterDescrip
         .apply {
             val parameter = this@toParameterDescriptor
             if (parameter is OptionalHeaderParam<*>) {
-                withDefaultValue(parameter.default.toString())
+                withDefaultValue(parameter.default?.toString())
             } else if (parameter is OptionalQueryParam<*>) {
-                withDefaultValue(parameter.default.toString())
+                withDefaultValue(parameter.default?.toString())
             }
         }
         .build()
