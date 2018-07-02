@@ -70,14 +70,15 @@ data class QueryParam<T>(
 
 fun <T> optionalQueryParam(name: String,
                            description: String,
-                           condition: Validator<T>, emptyAsMissing: Boolean = false,
+                           condition: Validator<T>,
+                           emptyAsMissing: Boolean = false,
                            invalidAsMissing: Boolean = false) =
         OptionalQueryParam(name, condition.optional(), description, default = null, emptyAsMissing = emptyAsMissing, invalidAsMissing = invalidAsMissing)
 
 fun <T> optionalQueryParam(name: String,
                            description: String,
-                           default: T,
                            condition: Validator<T>,
+                           default: T,
                            emptyAsMissing: Boolean = false,
                            invalidAsMissing: Boolean = false) =
         OptionalQueryParam(name, condition, description, default = default, emptyAsMissing = emptyAsMissing, invalidAsMissing = invalidAsMissing)
@@ -100,9 +101,9 @@ fun <T> optionalHeaderParam(
 fun <T> optionalHeaderParam(
         name: String,
         description: String,
-        default: T,
         condition: Validator<T>,
         emptyAsMissing: Boolean = false,
+        default: T,
         invalidAsMissing: Boolean = false) =
         OptionalHeaderParam(name, condition, description, default = default, emptyAsMissing = emptyAsMissing, invalidAsMissing = invalidAsMissing)
 

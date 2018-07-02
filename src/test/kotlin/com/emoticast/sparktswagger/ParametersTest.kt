@@ -1,6 +1,5 @@
 package com.emoticast.sparktswagger
 
-import com.beerboy.ss.SparkSwagger
 import com.beerboy.ss.extensions.json
 import org.junit.Rule
 import org.junit.Test
@@ -10,24 +9,24 @@ import java.util.*
 val stringParam = pathParam(
         name = "stringParam",
         description = "Description",
-        condition = nonEmptyString
+        condition = NonEmptyString
 )
 
 val intparam = pathParam(
         name = "intParam",
         description = "Description",
-        condition = nonNegativeInt
+        condition = NonNegativeInt
 )
 
-val q = queryParam(name = "q", description = "description", condition = nonEmptyString)
-val int = queryParam(name = "int", description = "description", condition = nonNegativeInt, emptyAsMissing = true)
-private val offset = optionalQueryParam(name = "offset", description = "description", condition = nonNegativeInt, default = 30)
-val limit = optionalQueryParam(name = "limit", description = "description", condition = nonNegativeInt)
+val q = queryParam(name = "q", description = "description", condition = NonEmptyString)
+val int = queryParam(name = "int", description = "description", condition = NonNegativeInt, emptyAsMissing = true)
+private val offset = optionalQueryParam(name = "offset", description = "description", condition = NonNegativeInt, default = 30)
+val limit = optionalQueryParam(name = "limit", description = "description", condition = NonNegativeInt)
 
-val qHead = headerParam(name = "q", description = "description", condition = nonEmptyString)
-val intHead = headerParam(name = "int", description = "description", condition = nonNegativeInt)
-val offsetHead = optionalHeaderParam(name = "offsetHead", description = "description", condition = nonNegativeInt, default = 666, emptyAsMissing = true)
-val limitHead = optionalHeaderParam(name = "limitHead", description = "description", condition = nonNegativeInt, emptyAsMising = true)
+val qHead = headerParam(name = "q", description = "description", condition = NonEmptyString)
+val intHead = headerParam(name = "int", description = "description", condition = NonNegativeInt)
+val offsetHead = optionalHeaderParam(name = "offsetHead", description = "description", condition = NonNegativeInt, default = 666, emptyAsMissing = true)
+val limitHead = optionalHeaderParam(name = "limitHead", description = "description", condition = NonNegativeInt, emptyAsMising = true)
 
 val time = queryParam("time", description = "the time", condition = DateValidator)
 

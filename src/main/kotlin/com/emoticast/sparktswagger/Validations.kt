@@ -1,24 +1,24 @@
 package com.emoticast.sparktswagger
 
-object nonNegativeInt : Validator<Int> {
+object NonNegativeInt : Validator<Int> {
     override val description = "non negative integer"
     override val regex = """^\d+$""".toRegex()
     override val parse: (String) -> Int = { it.toInt() }
 }
 
-object nonEmptyString : Validator<String> {
+object NonEmptyString : Validator<String> {
     override val description = "non empty string"
     override val regex = """^\w+$""".toRegex()
     override val parse: (String) -> String = { it }
 }
 
-object nonEmptyStringSet : Validator<Set<String>> {
+object NonEmptyStringSet : Validator<Set<String>> {
     override val description = "non empty string set"
     override val regex = """^(\w+,?)*\w+$""".toRegex()
     override val parse: (String) -> Set<String> = { it.split(",").toSet() }
 }
 
-object stringSet : Validator<Set<String>> {
+object StringSet : Validator<Set<String>> {
     override val description = "string set"
     override val regex = """^\w*$""".toRegex()
     override val parse: (String) -> Set<String> = { it.split(",").toSet() }

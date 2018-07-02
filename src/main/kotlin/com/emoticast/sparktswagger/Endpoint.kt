@@ -179,7 +179,7 @@ val <T> T.created: HttpResponse<T> get() = SuccessfulHttpResponse(201, this)
 
 fun <T> badRequest(message: String, code: Int = 400) = ErrorHttpResponse<T>(code, listOf(message))
 fun <T> forbidden(message: String) = ErrorHttpResponse<T>(403, listOf(message))
-fun <T> notFound() = ErrorHttpResponse<T>(403, listOf("not found"))
+fun <T> notFound() = ErrorHttpResponse<T>(404, listOf("not found"))
 
 data class SuccessfulHttpResponse<T>(override val code: Int,
                                      val body: T) : HttpResponse<T>()

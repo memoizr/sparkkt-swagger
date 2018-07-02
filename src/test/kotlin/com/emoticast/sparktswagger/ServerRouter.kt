@@ -9,30 +9,30 @@ val clips = "clips"
 
 val clipId = pathParam(
         name = "clipId",
-        condition = nonNegativeInt,
+        condition = NonNegativeInt,
         description = "The clip id")
 
 val name = headerParam(name = "clips",
-        condition = nonEmptyString,
+        condition = NonEmptyString,
         description = "The clip id")
 
 private val query = optionalQueryParam(
         name = "query",
         default = "978",
         description = "The query",
-        condition = nonEmptyString)
+        condition = NonEmptyString)
 
 private val length = optionalQueryParam(
         name = "length",
         description = "The number of items returned in the page",
         default = 20,
-        condition = nonNegativeInt)
+        condition = NonNegativeInt)
 
 private val offset = optionalQueryParam(
         name = "offset",
         description = "The offset from the first item",
         default = 0,
-        condition = nonNegativeInt)
+        condition = NonNegativeInt)
 
 val ServerRouter: Router.() -> Unit = {
     val getParametrizedGreeting: SomeBodyBundle<RequestBody, String> = { body.hello.plus("").ok }
