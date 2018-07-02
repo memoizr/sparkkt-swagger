@@ -32,9 +32,9 @@ private val offset = optionalQueryParam(
         condition = NonNegativeInt)
 
 val ServerRouter: Router.() -> Unit = {
-    val getParametrizedGreeting: SomeBodyBundle<RequestBody, String> = { body.hello.plus("").ok }
+    val getParametrizedGreeting: Controller<RequestBody, String> = { body.hello.plus("").ok }
 
-    val getGreeting: NoBodyBundle<String> = {
+    val getGreeting: Controller<Nothing, String> = {
         request[query]
         "hello".ok
     }

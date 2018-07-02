@@ -18,10 +18,9 @@ inline fun <reified T : Any> body() = Body(T::class)
 class Body<T : Any>(val klass: KClass<T>)
 
 
-typealias SomeBodyBundle<A, B> = Controller<A>.() -> HttpResponse<B>
-typealias NoBodyBundle<B> = Controller<Any>.() -> HttpResponse<B>
+typealias Controller<A, B> = Bundle<A>.() -> HttpResponse<B>
 
-data class Controller<T : Any>(
+data class Bundle<T : Any>(
         val klass: KClass<T>?,
         val params: Set<Parameter<*>>,
         val request: Request,
@@ -98,7 +97,7 @@ data class Endpoint<B : Any>(
         }
     }
 
-    inline infix fun <reified T : Any> isHandledBy(noinline block: Controller<B>.() -> HttpResponse<T>) {
+    inline infix fun <reified T : Any> isHandledBy(noinline block: Bundle<B>.() -> HttpResponse<T>) {
         val withResponseType = MethodDescriptor.path(resourceName)
                 .withSummary(description)
                 .withResponseType(T::class)
@@ -116,7 +115,7 @@ data class Endpoint<B : Any>(
                 response.status(400)
                 invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }.let { ClientError(400, it).json }
             } else try {
-                block(Controller(body?.klass, (headerParams + queryParams + pathParams), request, response)).let {
+                block(Bundle(body?.klass, (headerParams + queryParams + pathParams), request, response)).let {
                     response.status(it.code)
                     when (it) {
                         is SuccessfulHttpResponse -> it.body.json

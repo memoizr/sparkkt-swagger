@@ -8,17 +8,17 @@ import spark.Service
 
 class Router(val http: SparkSwagger) {
 
-    infix fun String.GET(path: String) = Endpoint<Any>(HTTPMethod.GET, this, http, path.leadingSlash, emptySet(), emptySet(), emptySet())
-    infix fun String.GET(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.GET, this, http, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet())
+    infix fun String.GET(path: String) = Endpoint(HTTPMethod.GET, this, http, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
+    infix fun String.GET(path: ParametrizedPath) = Endpoint(HTTPMethod.GET, this, http, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
 
-    infix fun String.POST(path: String) = Endpoint<Any>(HTTPMethod.POST, this, http, path.leadingSlash, emptySet(), emptySet(), emptySet())
-    infix fun String.POST(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.POST, this, http, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet())
+    infix fun String.POST(path: String) = Endpoint(HTTPMethod.POST, this, http, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
+    infix fun String.POST(path: ParametrizedPath) = Endpoint(HTTPMethod.POST, this, http, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
 
-    infix fun String.PUT(path: String) = Endpoint<Any>(HTTPMethod.PUT, this, http, path.leadingSlash, emptySet(), emptySet(), emptySet())
-    infix fun String.PUT(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.PUT, this, http, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet())
+    infix fun String.PUT(path: String) = Endpoint(HTTPMethod.PUT, this, http, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
+    infix fun String.PUT(path: ParametrizedPath) = Endpoint(HTTPMethod.PUT, this, http, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
 
-    infix fun String.DELETE(path: String) = Endpoint<Any>(HTTPMethod.DELETE, this, http, path.leadingSlash, emptySet(), emptySet(), emptySet())
-    infix fun String.DELETE(path: ParametrizedPath) = Endpoint<Any>(HTTPMethod.DELETE, this, http, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet())
+    infix fun String.DELETE(path: String) = Endpoint(HTTPMethod.DELETE, this, http, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
+    infix fun String.DELETE(path: ParametrizedPath) = Endpoint(HTTPMethod.DELETE, this, http, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
 
     operator fun String.div(path: String) = this.leadingSlash + "/" + path
     operator fun String.div(path: PathParam<out Any>) = ParametrizedPath(this + "/:" + path.name, setOf(path))
