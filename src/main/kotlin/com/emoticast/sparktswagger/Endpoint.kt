@@ -128,10 +128,18 @@ data class ClientError(val code: Int, val message: List<String>)
 
 fun Parameter<*>.toParameterDescriptor(): ParameterDescriptor = ParameterDescriptor.newBuilder()
         .withName(name)
-        .withDescription("$description -- ${pattern.description}")
+        .withDescription("""$description -- ${pattern.description}${if(emptyAsMissing) "-- Empty as Missing" else if (invalidAsMissing) "-- Invalid as missing" else ""}""")
         .withPattern(pattern.regex.toString())
         .withAllowEmptyValue(emptyAsMissing)
         .withRequired(required)
+        .apply {
+            val parameter = this@toParameterDescriptor
+            if (parameter is OptionalHeaderParam<*>) {
+                withDefaultValue(parameter.default.toString())
+            } else if (parameter is OptionalQueryParam<*>) {
+                withDefaultValue(parameter.default.toString())
+            }
+        }
         .build()
 
 fun Request.getPathParam(param: PathParam<*>) = params(param.name)
