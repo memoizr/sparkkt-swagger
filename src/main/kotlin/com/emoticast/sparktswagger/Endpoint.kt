@@ -140,7 +140,7 @@ fun Request.getPathParam(param: PathParam<*>) = params(param.name)
 fun Request.getQueryParam(param: QueryParameter<*>) = queryParams(param.name).filterValid(param)
 fun Request.getHeaderParam(param: HeaderParameter<*>) = headers(param.name).filterValid(param)
 
-private fun String?.filterValid(param: Parameter<*>) = when {
+fun String?.filterValid(param: Parameter<*>) = when {
     this == null -> null
     param.emptyAsMissing && this.isEmpty() -> null
     param.invalidAsMissing && !param.pattern.regex.matches(this) -> null
@@ -151,12 +151,12 @@ inline operator fun <reified T : Any> Request.get(param: PathParam<T>): T = para
 
 inline operator fun <reified T : Any?> Request.get(param: QueryParam<T>): T = queryParams(param.name).let { param.pattern.parse(it) }
 inline operator fun <reified T : Any?> Request.get(param: OptionalQueryParam<T>): T = queryParams(param.name)
-        ?.let { if (param.emptyAsMissing && it.isEmpty()) null else it }
+        .filterValid(param)
         ?.let { param.pattern.parse(it) } ?: param.default
 
 inline operator fun <reified T : Any?> Request.get(param: HeaderParam<T>): T = headers(param.name).let { param.pattern.parse(it) }
 inline operator fun <reified T : Any?> Request.get(param: OptionalHeaderParam<T>): T = headers(param.name)
-        ?.let { if (param.emptyAsMissing && it.isEmpty()) null else it }
+        .filterValid(param)
         ?.let { param.pattern.parse(it) } ?: param.default
 
 sealed class HttpResponse<T> {

@@ -13,7 +13,12 @@ class ValidationsTest: SparkTest() {
 
     @Rule
     @JvmField val rule = SparkTestRule(port) {
-        "" GET "foo" / id with queries(offset, allowInvalidQuery) with headers(allowInvalidHeader) isHandledBy { "ok".ok }
+        "" GET "foo" / id with queries(offset, allowInvalidQuery) with headers(allowInvalidHeader) isHandledBy {
+            request[offset]
+            request[allowInvalidHeader]
+            request[allowInvalidQuery]
+            "ok".ok }
+
     }
 
     @Test
