@@ -8,19 +8,19 @@ object NonNegativeInt : Validator<Int> {
 
 object NonEmptyString : Validator<String> {
     override val description = "non empty string"
-    override val regex = """^\w+$""".toRegex()
+    override val regex = """^.+$""".toRegex()
     override val parse: (String) -> String = { it }
 }
 
 object NonEmptyStringSet : Validator<Set<String>> {
     override val description = "non empty string set"
-    override val regex = """^(\w+,?)*\w+$""".toRegex()
+    override val regex = """^(.+,?)*\w+$""".toRegex()
     override val parse: (String) -> Set<String> = { it.split(",").toSet() }
 }
 
 object StringSet : Validator<Set<String>> {
     override val description = "string set"
-    override val regex = """^\w*$""".toRegex()
+    override val regex = """^\.*$""".toRegex()
     override val parse: (String) -> Set<String> = { it.split(",").toSet() }
 }
 
