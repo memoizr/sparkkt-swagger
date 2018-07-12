@@ -14,7 +14,7 @@ fun headers(vararg headerParameter: HeaderParameter<*>) = headerParameter.asList
 
 inline fun <reified T : Any> body(gson: Gson = Gson()) = Body(T::class, gson)
 
-data class Body<T : Any>(val klass: KClass<T>, val gson: Gson)
+data class Body<T : Any>(val klass: KClass<T>, val gson: Gson = Gson())
 
 
 typealias Controller<BODY_TYPE, RESPONSE_TYPE> = Bundle<BODY_TYPE>.() -> HttpResponse<RESPONSE_TYPE>
