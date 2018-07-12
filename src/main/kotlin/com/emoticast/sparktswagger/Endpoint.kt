@@ -12,9 +12,9 @@ import kotlin.reflect.KClass
 fun queries(vararg queryParameter: QueryParameter<*>) = queryParameter.asList()
 fun headers(vararg headerParameter: HeaderParameter<*>) = headerParameter.asList()
 
-inline fun <reified T : Any> body() = Body(T::class)
+inline fun <reified T : Any> body(gson: Gson = Gson()) = Body(T::class, gson)
 
-data class Body<T : Any>(val klass: KClass<T>, val gson: Gson = Gson())
+data class Body<T : Any>(val klass: KClass<T>, val gson: Gson)
 
 
 typealias Controller<BODY_TYPE, RESPONSE_TYPE> = Bundle<BODY_TYPE>.() -> HttpResponse<RESPONSE_TYPE>
