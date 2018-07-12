@@ -4,8 +4,7 @@ import com.beerboy.ss.SparkSwagger
 import com.beerboy.ss.descriptor.EndpointDescriptor.endpointPath
 import com.beerboy.ss.descriptor.MethodDescriptor
 import com.beerboy.ss.descriptor.ParameterDescriptor
-import com.emoticast.extensions.json
-import com.emoticast.extensions.parseJson
+import com.google.gson.Gson
 import spark.Request
 import spark.Response
 import kotlin.reflect.KClass
@@ -15,19 +14,18 @@ fun headers(vararg headerParameter: HeaderParameter<*>) = headerParameter.asList
 
 inline fun <reified T : Any> body() = Body(T::class)
 
-data class Body<T : Any>(val klass: KClass<T>)
+data class Body<T : Any>(val klass: KClass<T>, val gson: Gson = Gson())
 
 
 typealias Controller<BODY_TYPE, RESPONSE_TYPE> = Bundle<BODY_TYPE>.() -> HttpResponse<RESPONSE_TYPE>
 
 data class Bundle<T : Any>(
-        val klass: KClass<T>?,
+        private val _body: Body<T>?,
         val params: Set<Parameter<*>>,
         val request: Request,
         val response: Response
 ) {
-    val body: T by lazy { request.body()!!.parseJson(klass!!) }
-
+    val body: T by lazy { _body?.gson?.fromJson(request.body()!!, _body.klass.java)!! }
 
     inline operator fun <reified T : Any> Request.get(param: PathParam<T>): T =
             checkParamIsRegistered(param)
@@ -115,13 +113,13 @@ data class Endpoint<B : Any>(
             val invalidParams = getInvalidParams(request)
             if (invalidParams.isNotEmpty()) {
                 response.status(400)
-                invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }.let { ClientError(400, it).json }
+                invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }.let { Gson().toJson(ClientError(400, it)) }
             } else try {
-                block(Bundle(body?.klass, (headerParams + queryParams + pathParams), request, response)).let {
+                block(Bundle(body, (headerParams + queryParams + pathParams), request, response)).let {
                     response.status(it.code)
                     when (it) {
-                        is SuccessfulHttpResponse -> it.body.json
-                        is ErrorHttpResponse -> it.json
+                        is SuccessfulHttpResponse -> Gson().toJson(it.body)
+                        is ErrorHttpResponse -> Gson().toJson(it)
                     }
                 }
             } catch (unregisteredException: UnregisteredParamException) {
@@ -132,7 +130,7 @@ data class Endpoint<B : Any>(
                     is QueryParameter -> "query"
                     is PathParam -> "path"
                 }
-                ErrorHttpResponse<T>(500, listOf("Attempting to use unregistered $type parameter `${param.name}`")).json
+                Gson().toJson(ErrorHttpResponse<T>(500, listOf("Attempting to use unregistered $type parameter `${param.name}`")))
             }
         }
         when (httpMethod) {
