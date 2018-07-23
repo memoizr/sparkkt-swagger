@@ -1,10 +1,7 @@
 package com.emoticast.sparktswagger.documentation
 
 import com.emoticast.extensions.json
-import com.emoticast.extensions.print
 import com.emoticast.sparktswagger.HTTPMethod
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
@@ -72,11 +69,6 @@ fun main(args: Array<String>) {
                             .withRequestBody(ContentType.APPLICATION_JSON, TestClass::class)
                     ))
             .json
-
-    YAMLMapper().writeValueAsString(ObjectMapper().readTree(json))
-            .print()
-
-//    getExample(TestClass::class.starProjectedType).json.print()
 }
 
 fun toSchema(type: KType): Schemas {
@@ -111,7 +103,13 @@ fun toSchema(type: KType): Schemas {
         else -> {
             val parameters = klass.primaryConstructor!!.parameters
             Schemas.ObjectSchema(
-                    properties = parameters.map { it.name!! to toSchema(it.type) }.toMap(),
+                    properties = parameters.map { param -> param.name!! to (toSchema(param.type).let {
+                        when (it) {
+                        is Schemas.BaseSchema<*> -> it.apply { description = param.annotations.find { it is Description }?.let { (it as Description).value}
+                        }
+                        else -> it
+                    }
+                    }) }.toMap(),
                     required = parameters.filter { !it.type.isMarkedNullable }.map { it.name!! }
             )
         }
@@ -123,7 +121,7 @@ fun toSchema(type: KType): Schemas {
 }
 
 fun getExample(type: KType): Any {
-    val klass = type.print().jvmErasure
+    val klass = type.jvmErasure
     val value = when {
         klass == String::class -> "string"
         klass == Int::class -> 0

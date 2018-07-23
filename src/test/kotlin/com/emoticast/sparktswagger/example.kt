@@ -1,5 +1,7 @@
 package com.emoticast.sparktswagger
 
+import com.emoticast.extensions.json
+
 fun main(args: Array<String>) {
-    Server(config).startWithRoutes(ServerRouter).generateDoc()
+    print(Server(config).startWithRoutes(ServerRouter).generateDocs().json)
 }

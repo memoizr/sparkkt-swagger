@@ -3,7 +3,7 @@ package com.emoticast.extensions
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 
-internal fun <T : Any?> T.print(): T = this.apply {
+ fun <T : Any?> T.print(): T = this.apply {
     val stackFrame = Thread.currentThread().stackTrace[2]
     val className = stackFrame.className
     val methodName = stackFrame.methodName

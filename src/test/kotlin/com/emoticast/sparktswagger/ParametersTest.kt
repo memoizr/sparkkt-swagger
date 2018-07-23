@@ -1,6 +1,6 @@
 package com.emoticast.sparktswagger
 
-import com.beerboy.ss.extensions.json
+import com.emoticast.extensions.json
 import org.junit.Rule
 import org.junit.Test
 import java.text.SimpleDateFormat

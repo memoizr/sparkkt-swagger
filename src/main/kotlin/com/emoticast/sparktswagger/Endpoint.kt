@@ -1,9 +1,5 @@
 package com.emoticast.sparktswagger
 
-import com.beerboy.ss.SparkSwagger
-import com.beerboy.ss.descriptor.EndpointDescriptor.endpointPath
-import com.beerboy.ss.descriptor.MethodDescriptor
-import com.beerboy.ss.descriptor.ParameterDescriptor
 import com.google.gson.Gson
 import spark.Request
 import spark.Response
@@ -62,22 +58,17 @@ data class UnregisteredParamException(val param: Parameter<*>) : Throwable()
 data class Endpoint<B : Any>(
         val httpMethod: HTTPMethod,
         val description: String,
-        val swagger: SparkSwagger,
         val url: String,
         val pathParams: Set<PathParam<out Any>>,
         val queryParams: Set<QueryParameter<*>>,
         val headerParams: Set<HeaderParameter<*>>,
         val body: Body<B>) {
 
-    val path by lazy { url.split("/").dropLast(1).joinToString("/") }
-    val resourceName by lazy { "/" + url.split("/").last() }
-
     infix fun with(queryParameter: QueryParameter<*>) = copy(queryParams = queryParams + queryParameter)
     infix fun with(params: HeaderParameter<*>) = copy(headerParams = headerParams + params)
     infix fun <C : Any> with(body: Body<C>) = Endpoint(
             httpMethod,
             description,
-            swagger,
             url,
             pathParams,
             queryParams,
@@ -92,53 +83,6 @@ data class Endpoint<B : Any>(
                 is QueryParameter -> endpoint with param
                 else -> throw IllegalArgumentException(param.toString())
             }
-        }
-    }
-
-    inline infix fun <reified T : Any> isHandledBy(noinline block: Bundle<B>.() -> HttpResponse<T>) {
-        val withResponseType = MethodDescriptor.path(resourceName)
-                .withSummary(description)
-                .withResponseType(T::class)
-                .apply {
-                    if (body.klass != Nothing::class) {
-                        withRequestType(body.klass)
-                    }
-                    headerParams.forEach { withHeaderParam(it.toParameterDescriptor()) }
-                    queryParams.forEach { withQueryParam(it.toParameterDescriptor()) }
-                    pathParams.forEach { withPathParam(it.toParameterDescriptor()) }
-                }
-
-        val endpoint = swagger.endpoint(endpointPath(path), { _, _ -> null })
-        val function: (Request, Response) -> String = { request, response ->
-            val invalidParams = getInvalidParams(request)
-            if (invalidParams.isNotEmpty()) {
-                response.status(400)
-                invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }.let { Gson().toJson(ClientError(400, it)) }
-            } else try {
-                block(Bundle(body, (headerParams + queryParams + pathParams), request, response)).let {
-                    response.status(it.code)
-                    when (it) {
-                        is SuccessfulHttpResponse -> Gson().toJson(it.body)
-                        is ErrorHttpResponse -> Gson().toJson(it)
-                    }
-                }
-            } catch (unregisteredException: UnregisteredParamException) {
-                val param = unregisteredException.param
-
-                val type = when (param) {
-                    is HeaderParameter -> "header"
-                    is QueryParameter -> "query"
-                    is PathParam -> "path"
-                }
-                Gson().toJson(ErrorHttpResponse<T>(500, listOf("Attempting to use unregistered $type parameter `${param.name}`")))
-            }
-        }
-        when (httpMethod) {
-            HTTPMethod.GET -> endpoint.get(withResponseType, function)
-            HTTPMethod.POST -> endpoint.post(withResponseType, function)
-            HTTPMethod.PUT -> endpoint.put(withResponseType, function)
-            HTTPMethod.DELETE -> endpoint.delete(withResponseType, function)
-            HTTPMethod.OPTIONS -> endpoint.options(withResponseType, function)
         }
     }
 
@@ -168,22 +112,6 @@ data class Endpoint<B : Any>(
 }
 
 data class ClientError(val code: Int, val message: List<String>)
-
-fun Parameter<*>.toParameterDescriptor(): ParameterDescriptor = ParameterDescriptor.newBuilder()
-        .withName(name)
-        .withDescription("""$description -- ${pattern.description}${if (emptyAsMissing) " -- Empty as Missing" else ""}${if (invalidAsMissing) " -- Invalid as Missing" else ""}""")
-        .withPattern(pattern.regex.toString())
-        .withAllowEmptyValue(emptyAsMissing)
-        .withRequired(required)
-        .apply {
-            val parameter = this@toParameterDescriptor
-            if (parameter is OptionalHeaderParam<*>) {
-                withDefaultValue(parameter.default?.toString())
-            } else if (parameter is OptionalQueryParam<*>) {
-                withDefaultValue(parameter.default?.toString())
-            }
-        }
-        .build()
 
 fun Request.getPathParam(param: PathParam<*>) = params(param.name)
         .let { if (it != null && param.emptyAsMissing && it.isEmpty()) null else it }

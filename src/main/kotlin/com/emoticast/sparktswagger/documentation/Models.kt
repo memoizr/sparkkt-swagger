@@ -33,79 +33,81 @@ sealed class Schemas {
             open val type: DataType,
             open val format: Format? = null,
             var nullable: Boolean? = null
-    ) : Schemas()
+    ) : Schemas() {
+        abstract var description: String?
+    }
 
     data class ArraySchema(
             val items: Schemas,
             val maxItems: Int? = null,
             val minItems: Int? = null,
             val uniqueItems: Boolean? = null,
-            val description: String? = null,
-            val default: List<*>? = null
+            val default: List<*>? = null,
+            override var description: String? = null
     ) : BaseSchema<List<*>>(type = DataType.array)
 
     data class StringSchema(
-            val description: String? = null,
+            override var description: String? = null,
             val default: String? = null,
             val pattern: String? = null,
             val enum: List<String>? = null
     ) : BaseSchema<String>(type = DataType.string)
 
     data class IntSchema(
-            val description: String? = null,
+            override var description: String? = null,
             val maximum: Int? = null,
             val minimum: Int? = null,
             val default: Int? = null
     ) : BaseSchema<Int>(type = DataType.integer, format = Format.int32)
 
     data class LongSchema(
-            val description: String? = null,
+            override var description: String? = null,
             val default: Long? = null,
             val maximum: Long? = null,
             val minimum: Long? = null
     ) : BaseSchema<Long>(type = DataType.integer, format = Format.int64)
 
     data class DoubleSchema(
-            val description: String? = null,
+            override var description: String? = null,
             val default: Double? = null,
             val maximum: Double? = null,
             val minimum: Double? = null
     ) : BaseSchema<Double>(type = DataType.number, format = Format.double)
 
     data class FloatSchema(
-            val description: String? = null,
+            override var description: String? = null,
             val default: Float? = null,
             val maximum: Double? = null,
             val minimum: Double? = null
     ) : BaseSchema<Float>(type = DataType.number, format = Format.float)
 
     data class ByteSchema(
-            val description: String? = null,
+            override var description: String? = null,
             val default: Byte? = null
     ) : BaseSchema<Byte>(type = DataType.string, format = Format.byte)
 
     data class BinarySchema(
-            val description: String? = null,
+            override var description: String? = null,
             val default: ByteArray? = null
     ) : BaseSchema<ByteArray>(type = DataType.string, format = Format.byte)
 
     data class BooleanSchema(
-            val description: String? = null,
+            override var description: String? = null,
             val default: Boolean? = null
     ) : BaseSchema<Boolean>(type = DataType.boolean)
 
     data class DateSchema(
-            val description: String? = null,
+            override var description: String? = null,
             val default: Date? = null
     ) : BaseSchema<Date>(type = DataType.string, format = Format.date)
 
     data class DateTimeSchema(
-            val description: String? = null,
+            override var description: String? = null,
             val default: Date? = null
     ) : BaseSchema<Date>(type = DataType.string, format = Format.`date-time`)
 
     data class PasswordSchema(
-            val description: String? = null,
+            override var description: String? = null,
             val pattern: String? = null,
             val default: String? = null
     ) : BaseSchema<String>(type = DataType.string, format = Format.password)
@@ -118,7 +120,7 @@ sealed class Schemas {
             val items: Schemas? = null,
             val properties: Map<String, Schemas>? = null,
             val additionalProperties: Schemas? = null,
-            val description: String? = null,
+            override var description: String? = null,
             val default: Any? = null,
             val required: List<String>? = null,
             val example: Any? = null
@@ -321,3 +323,6 @@ data class Info(
         val contact: Contact? = null,
         val license: License? = null
 )
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class Description(val value: String)
