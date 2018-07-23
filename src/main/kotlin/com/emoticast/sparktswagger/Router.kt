@@ -2,6 +2,7 @@ package com.emoticast.sparktswagger
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
+import com.emoticast.extensions.json
 import com.emoticast.extensions.print
 import com.emoticast.sparktswagger.documentation.*
 import com.emoticast.sparktswagger.documentation.Server
@@ -17,6 +18,11 @@ class Router(val config: Config, val service: Service) {
     data class EndpointBundle<T : Any>(val endpoint: Endpoint<T>, val response: KClass<*>, val function: (Request, Response) -> String)
 
     val endpoints = mutableListOf<EndpointBundle<*>>()
+    val destination = "/tmp/swagger-ui/foobar"
+
+    init {
+        service.externalStaticFileLocation(destination)
+    }
 
     infix fun String.GET(path: String) = Endpoint(HTTPMethod.GET, this, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun String.GET(path: ParametrizedPath) = Endpoint(HTTPMethod.GET, this, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
@@ -36,7 +42,6 @@ class Router(val config: Config, val service: Service) {
 
     inline infix fun <B : Any, reified T : Any> Endpoint<B>.isHandledBy(noinline block: Bundle<B>.() -> HttpResponse<T>) {
 
-        url.print()
         val function: (Request, Response) -> String = { request, response ->
             val invalidParams = getInvalidParams(request)
             if (invalidParams.isNotEmpty()) {
@@ -128,7 +133,17 @@ class Router(val config: Config, val service: Service) {
                                         }
                         )
                     }
-                }.fold(openApi) { a, b -> a.withPath(b.first, b.second) }
+                }.fold(openApi) { a, b -> a.withPath(b.first, b.second) }.apply {
+                    copyResourceToFile("index.html", destination)
+                    copyResourceToFile("swagger-ui.css", destination)
+                    copyResourceToFile("swagger-ui.js", destination)
+                    copyResourceToFile("swagger-ui-bundle.js", destination)
+                    copyResourceToFile("swagger-ui-standalone-preset.js", destination)
+                    writeToFile(this.json, "$destination/${config.docPath}.json")
+                }
+    }
+
+    fun OpenApi.serveDocs() {
     }
 }
 

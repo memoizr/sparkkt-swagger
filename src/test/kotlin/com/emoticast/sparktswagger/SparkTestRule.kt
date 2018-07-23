@@ -9,11 +9,11 @@ import java.net.ConnectException
 
 val config = Config(description = "A test",
         basePath = "/$root",
-        title = "Test",
+        title = "Tunemoji API Documentation",
         port = 3000,
         logLevel = Level.INFO,
         host = "http://localhost:3000/$root",
-        docPath = "/doc",
+        docPath = "spec",
         docExpansion = DocExpansion.LIST
 
 )

@@ -1,13 +1,16 @@
 package com.emoticast.sparktswagger.documentation
 
-import com.emoticast.extensions.json
 import com.emoticast.sparktswagger.HTTPMethod
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.jvmErasure
+
 
 object DocCreator {
 }
@@ -59,17 +62,30 @@ fun Operation.withResponse(
         )))))
 
 fun main(args: Array<String>) {
-    val json = OpenApi(info = Info("hello world", "1.0"))
-            .withPath("/foos/{bars}", Path()
-                    .withOperation(HTTPMethod.POST, Operation(emptyMap())
-                            .withParameter(Parameters.PathParameter("bars", toSchema(String::class.starProjectedType)))
-                            .withParameter(Parameters.QueryParameter("query", false, toSchema(String::class.starProjectedType)))
-                            .withParameter(Parameters.HeaderParameter("X-Accept", false, toSchema(String::class.starProjectedType)))
-                            .withResponse(ContentType.APPLICATION_JSON, TestClass::class)
-                            .withRequestBody(ContentType.APPLICATION_JSON, TestClass::class)
-                    ))
-            .json
 }
+
+fun writeToFile(content: String, destination: String) {
+    File(destination.split("/").dropLast(1).joinToString("")).apply { if (!exists()) mkdirs() }
+    content.byteInputStream().use { input ->
+        FileOutputStream(destination).use { output ->
+            input.copyTo(output)
+        }
+    }
+}
+
+fun copyResourceToFile(resourceName: String, destination: String) {
+    val stream: InputStream = ClassLoader.getSystemClassLoader().getResourceAsStream(resourceName)
+            ?: throw Exception("Cannot get resource \"$resourceName\" from Jar file.")
+    val s = "$destination/$resourceName"
+    File(destination).apply { if (!exists()) mkdirs() }
+    val resStreamOut = FileOutputStream(s)
+    stream.use { input ->
+        resStreamOut.use { output ->
+            input.copyTo(output)
+        }
+    }
+}
+
 
 fun toSchema(type: KType): Schemas {
     val klass = type.jvmErasure
@@ -103,13 +119,16 @@ fun toSchema(type: KType): Schemas {
         else -> {
             val parameters = klass.primaryConstructor!!.parameters
             Schemas.ObjectSchema(
-                    properties = parameters.map { param -> param.name!! to (toSchema(param.type).let {
-                        when (it) {
-                        is Schemas.BaseSchema<*> -> it.apply { description = param.annotations.find { it is Description }?.let { (it as Description).value}
-                        }
-                        else -> it
-                    }
-                    }) }.toMap(),
+                    properties = parameters.map { param ->
+                        param.name!! to (toSchema(param.type).let {
+                            when (it) {
+                                is Schemas.BaseSchema<*> -> it.apply {
+                                    description = param.annotations.find { it is Description }?.let { (it as Description).value }
+                                }
+                                else -> it
+                            }
+                        })
+                    }.toMap(),
                     required = parameters.filter { !it.type.isMarkedNullable }.map { it.name!! }
             )
         }
