@@ -29,7 +29,7 @@ interface Ref {
 }
 
 sealed class Schemas {
-    abstract class BaseSchema<T>(
+    abstract class BaseSchema<T: Any>(
             open val type: DataType,
             open val format: Format? = null,
             var nullable: Boolean? = null
@@ -42,6 +42,7 @@ sealed class Schemas {
             val maxItems: Int? = null,
             val minItems: Int? = null,
             val uniqueItems: Boolean? = null,
+            var example: Any? = null,
             val default: List<*>? = null,
             override var description: String? = null
     ) : BaseSchema<List<*>>(type = DataType.array)
@@ -50,6 +51,7 @@ sealed class Schemas {
             override var description: String? = null,
             val default: String? = null,
             val pattern: String? = null,
+            var example: Any? = null,
             val enum: List<String>? = null
     ) : BaseSchema<String>(type = DataType.string)
 
@@ -57,6 +59,7 @@ sealed class Schemas {
             override var description: String? = null,
             val maximum: Int? = null,
             val minimum: Int? = null,
+            var example: Any? = null,
             val default: Int? = null
     ) : BaseSchema<Int>(type = DataType.integer, format = Format.int32)
 
@@ -64,6 +67,7 @@ sealed class Schemas {
             override var description: String? = null,
             val default: Long? = null,
             val maximum: Long? = null,
+            var example: Any? = null,
             val minimum: Long? = null
     ) : BaseSchema<Long>(type = DataType.integer, format = Format.int64)
 
@@ -71,6 +75,7 @@ sealed class Schemas {
             override var description: String? = null,
             val default: Double? = null,
             val maximum: Double? = null,
+            var example: Any? = null,
             val minimum: Double? = null
     ) : BaseSchema<Double>(type = DataType.number, format = Format.double)
 
@@ -78,6 +83,7 @@ sealed class Schemas {
             override var description: String? = null,
             val default: Float? = null,
             val maximum: Double? = null,
+            var example: Any? = null,
             val minimum: Double? = null
     ) : BaseSchema<Float>(type = DataType.number, format = Format.float)
 
@@ -122,8 +128,8 @@ sealed class Schemas {
             val additionalProperties: Schemas? = null,
             override var description: String? = null,
             val default: Any? = null,
-            val required: List<String>? = null,
-            val example: Any? = null
+            var example: Any? = null,
+            val required: List<String>? = null
     ) : BaseSchema<Any>(type = DataType.`object`)
 
     data class Reference(override val `$ref`: String) : Schemas(), Ref
@@ -325,4 +331,12 @@ data class Info(
 )
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class Description(val value: String)
+@Repeatable()
+annotation class Description(val description: String,
+                             val exString: String = "",
+                             val exInt: Int = 0,
+                             val exLong: Long = 0,
+                             val exFloat: Float = 0.0f,
+                             val exDouble: Double = 0.0,
+                             val exEmptyList: Boolean = false)
+

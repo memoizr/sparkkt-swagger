@@ -1,5 +1,6 @@
 package com.emoticast.sparktswagger.documentation
 
+import com.emoticast.extensions.print
 import com.emoticast.sparktswagger.HTTPMethod
 import java.io.File
 import java.io.FileOutputStream
@@ -120,15 +121,44 @@ fun toSchema(type: KType): Schemas {
             val parameters = klass.primaryConstructor!!.parameters
             Schemas.ObjectSchema(
                     properties = parameters.map { param ->
-                        param.name!! to (toSchema(param.type).let {
-                            when (it) {
-                                is Schemas.BaseSchema<*> -> it.apply {
-                                    description = param.annotations.find { it is Description }?.let { (it as Description).value }
+                        param.name!! to (toSchema(param.type)
+                                .let { schema ->
+                                    val desc = param.annotations.print().find { it is Description }?.let { (it as Description) }
+                                    when (schema) {
+                                        is Schemas.ArraySchema -> schema.apply {
+                                            description = desc?.description
+                                            example = if (desc?.exEmptyList != null && desc.exEmptyList) listOf<Any>() else null
+                                        }
+                                        is Schemas.StringSchema -> schema.apply {
+                                            description = desc?.description
+                                            example = desc?.exString?.nullIfEmpty()
+                                        }
+                                        is Schemas.FloatSchema -> schema.apply {
+                                            description = desc?.description
+                                            example = desc?.exFloat?.nullIfZero()
+                                        }
+                                        is Schemas.DoubleSchema -> schema.apply {
+                                            description = desc?.description
+                                            example = desc?.exDouble?.nullIfZero()
+                                        }
+                                        is Schemas.IntSchema -> schema.apply {
+                                            description = desc?.description
+                                            example = desc?.exInt?.nullIfZero()
+                                        }
+                                        is Schemas.LongSchema -> schema.apply {
+                                            description = desc?.description
+                                            example = desc?.exLong?.nullIfZero()
+                                        }
+                                        is Schemas.BaseSchema<*> -> schema.apply {
+                                            description = desc?.description
+                                        }
+                                        else -> schema
+                                    }
                                 }
-                                else -> it
-                            }
-                        })
-                    }.toMap(),
+                                )
+                    }
+                            .toMap()
+                    ,
                     required = parameters.filter { !it.type.isMarkedNullable }.map { it.name!! }
             )
         }
@@ -138,6 +168,12 @@ fun toSchema(type: KType): Schemas {
             nullable = true
     }
 }
+
+fun String.nullIfEmpty() = if (isEmpty()) null else this
+fun Int.nullIfZero() = if (this == 0) null else this
+fun Long.nullIfZero() = if (this == 0L) null else this
+fun Double.nullIfZero() = if (this == 0.0) null else this
+fun Float.nullIfZero() = if (this == 0f) null else this
 
 fun getExample(type: KType): Any {
     val klass = type.jvmErasure
@@ -170,7 +206,9 @@ abstract class Sealed {
 }
 
 data class TestClass(
+        @Description("no way punk", exString = "https://google.com")
         val aString: String,
+        @Description("The best int", exInt = 33)
         val aInt: Int,
         val aLong: Long,
         val aFloat: Float,
@@ -179,7 +217,8 @@ data class TestClass(
         val aBinary: ByteArray,
         val aDate: Date,
         val aListString: List<String>,
-        val aListBoolean: List<String>,
+        @Description("A great list", exEmptyList = true)
+        val aListBoolean: List<Boolean>,
         val anObjectList: List<SimpleObject>,
         val theEnum: ClassicEnum,
         val aSeal: MySeal
