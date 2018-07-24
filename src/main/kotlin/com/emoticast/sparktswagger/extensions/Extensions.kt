@@ -18,6 +18,7 @@ fun <T : Any?> T.print(): T = this.apply {
 val gson = GsonBuilder().registerSealedClassAdapter().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ").create()
 val Any.json: String get() = gson.toJson(this)
 fun Any.toHashMap() = gson.fromJson(json, Map::class.java)
+inline fun <reified T : Any> String.parseJson() :T  = gson.fromJson(this, T::class.java)
 
 fun GsonBuilder.registerSealedClassAdapter() = registerTypeHierarchyAdapter(Sealed::class.java, JsonDeserializer<Sealed> { json, typeOfT, context ->
    val clazz = typeOfT as Class<*>
