@@ -22,6 +22,7 @@ internal fun toSchema(type: KType): Schemas {
         klass == List::class -> Schemas.ArraySchema(items = toSchema(type.arguments.first().type!!))
         klass.java.isEnum -> Schemas.StringSchema(enum = klass.java.enumConstants.map { it.toString() })
         klass.isSealed && Sealed::class.java.isAssignableFrom(klass.java) -> sealedSchema(klass, type)
+        klass.objectInstance != null -> Schemas.ObjectSchema()
         else -> objectSchema(klass)
     }
     return schema.apply {

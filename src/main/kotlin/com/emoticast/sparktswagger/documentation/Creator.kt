@@ -59,4 +59,5 @@ enum class ClassicEnum {
 sealed class MySeal : Sealed() {
     data class Bar(val x: String) : MySeal()
     data class Yo(val y: Int) : MySeal()
+    object nope: MySeal()
 }
