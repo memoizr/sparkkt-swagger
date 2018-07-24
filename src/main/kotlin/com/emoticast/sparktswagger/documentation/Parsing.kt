@@ -113,6 +113,7 @@ private fun getExample(type: KType): Any {
         klass == Date::class -> Date().toString()
         klass == List::class -> listOf(getExample(type.arguments.first().type!!))
         klass.java.isEnum -> klass.java.enumConstants.map { it.toString() }.first()
+        klass.objectInstance != null && Sealed::class.java.isAssignableFrom(klass.java) -> mapOf(Sealed::type.name to klass.simpleName)
         klass.isSealed && Sealed::class.java.isAssignableFrom(klass.java) -> {
             val subclass = klass.nestedClasses.filter { it.isFinal && Sealed::class.java.isAssignableFrom(it.java) }.first()
             val ex = getExample(subclass.starProjectedType) as Map<Any, Any>
