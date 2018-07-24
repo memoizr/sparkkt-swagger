@@ -34,17 +34,17 @@ private val offset = optionalQueryParam(
         condition = NonNegativeInt)
 
 val ServerRouter: Router.() -> Unit = {
-//    val getGreeting: Controller<Nothing, AResponse> = {
+//    val getGreeting: Handler<Nothing, AResponse> = {
 //        request[query]
 //        AResponse(0, 0, 0, listOf(Query("hey")), FooEnum.A).ok
 //    }
 
-    val getPathGreeting: Controller<Nothing, TestClass> = {
+    val getPathGreeting: Handler<Nothing, TestClass> = {
         request[query]
         (null!! as TestClass).ok
     }
 
-//    val getGreetingBody: Controller<RequestBody, AResponse> = {
+//    val getGreetingBody: Handler<RequestBody, AResponse> = {
 //        request[query]
 //        AResponse(0, 0, 0, listOf(Query("hey")), FooEnum.A).ok
 //    }

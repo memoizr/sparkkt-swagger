@@ -2,7 +2,7 @@ package com.emoticast.sparktswagger.documentation
 
 import java.util.*
 
-data class OpenApi(
+internal data class OpenApi(
         val openapi: String = "3.0.0",
         val info: Info,
         val paths: Map<String, Path> = emptyMap(),
@@ -13,7 +13,7 @@ data class OpenApi(
         val externalDocs: ExternalDocumentation? = null
 )
 
-data class Components(
+internal data class Components(
         val schemas: Map<String, Schemas>,
         val responses: Map<String, Responses>,
         val parameters: Map<String, Parameters>,
@@ -24,12 +24,11 @@ data class Components(
         val links: Map<String, Links>
 )
 
-interface Ref {
+internal interface Ref {
     val `$ref`: String
 }
-
-sealed class Schemas {
-    abstract class BaseSchema<T: Any>(
+internal sealed class Schemas {
+    internal abstract class BaseSchema<T: Any>(
             open val type: DataType,
             open val format: Format? = null,
             var nullable: Boolean? = null
@@ -37,7 +36,7 @@ sealed class Schemas {
         abstract var description: String?
     }
 
-    data class ArraySchema(
+    internal data class ArraySchema(
             val items: Schemas,
             val maxItems: Int? = null,
             val minItems: Int? = null,
@@ -47,7 +46,7 @@ sealed class Schemas {
             override var description: String? = null
     ) : BaseSchema<List<*>>(type = DataType.array)
 
-    data class StringSchema(
+    internal data class StringSchema(
             override var description: String? = null,
             val default: String? = null,
             val pattern: String? = null,
@@ -55,7 +54,7 @@ sealed class Schemas {
             val enum: List<String>? = null
     ) : BaseSchema<String>(type = DataType.string)
 
-    data class IntSchema(
+    internal data class IntSchema(
             override var description: String? = null,
             val maximum: Int? = null,
             val minimum: Int? = null,
@@ -63,7 +62,7 @@ sealed class Schemas {
             val default: Int? = null
     ) : BaseSchema<Int>(type = DataType.integer, format = Format.int32)
 
-    data class LongSchema(
+    internal data class LongSchema(
             override var description: String? = null,
             val default: Long? = null,
             val maximum: Long? = null,
@@ -71,7 +70,7 @@ sealed class Schemas {
             val minimum: Long? = null
     ) : BaseSchema<Long>(type = DataType.integer, format = Format.int64)
 
-    data class DoubleSchema(
+    internal data class DoubleSchema(
             override var description: String? = null,
             val default: Double? = null,
             val maximum: Double? = null,
@@ -79,7 +78,7 @@ sealed class Schemas {
             val minimum: Double? = null
     ) : BaseSchema<Double>(type = DataType.number, format = Format.double)
 
-    data class FloatSchema(
+    internal data class FloatSchema(
             override var description: String? = null,
             val default: Float? = null,
             val maximum: Double? = null,
@@ -87,38 +86,38 @@ sealed class Schemas {
             val minimum: Double? = null
     ) : BaseSchema<Float>(type = DataType.number, format = Format.float)
 
-    data class ByteSchema(
+    internal data class ByteSchema(
             override var description: String? = null,
             val default: Byte? = null
     ) : BaseSchema<Byte>(type = DataType.string, format = Format.byte)
 
-    data class BinarySchema(
+    internal data class BinarySchema(
             override var description: String? = null,
             val default: ByteArray? = null
     ) : BaseSchema<ByteArray>(type = DataType.string, format = Format.byte)
 
-    data class BooleanSchema(
+    internal data class BooleanSchema(
             override var description: String? = null,
             val default: Boolean? = null
     ) : BaseSchema<Boolean>(type = DataType.boolean)
 
-    data class DateSchema(
+    internal data class DateSchema(
             override var description: String? = null,
             val default: Date? = null
     ) : BaseSchema<Date>(type = DataType.string, format = Format.date)
 
-    data class DateTimeSchema(
+    internal data class DateTimeSchema(
             override var description: String? = null,
             val default: Date? = null
     ) : BaseSchema<Date>(type = DataType.string, format = Format.`date-time`)
 
-    data class PasswordSchema(
+    internal data class PasswordSchema(
             override var description: String? = null,
             val pattern: String? = null,
             val default: String? = null
     ) : BaseSchema<String>(type = DataType.string, format = Format.password)
 
-    data class ObjectSchema(
+    internal data class ObjectSchema(
             val allOf: List<Schemas>? = null,
             val oneOf: List<Schemas>? = null,
             val anyOf: List<Schemas>? = null,
@@ -132,15 +131,15 @@ sealed class Schemas {
             val required: List<String>? = null
     ) : BaseSchema<Any>(type = DataType.`object`)
 
-    data class Reference(override val `$ref`: String) : Schemas(), Ref
+    internal data class Reference(override val `$ref`: String) : Schemas(), Ref
 }
 
-enum class Format { int32, int64, float, double, byte, binary, date, `date-time`, password }
-enum class DataType { integer, number, string, boolean, array, `object` }
+internal enum class Format { int32, int64, float, double, byte, binary, date, `date-time`, password }
+internal enum class DataType { integer, number, string, boolean, array, `object` }
 
-sealed class Responses {
-    data class Reference(override val `$ref`: String) : Responses(), Ref
-    data class Response(
+internal sealed class Responses {
+    internal data class Reference(override val `$ref`: String) : Responses(), Ref
+    internal data class Response(
             val description: String = "A response",
             val headers: Map<String, Headers>? = null,
             val content: Map<String, MediaType>? = null,
@@ -148,14 +147,14 @@ sealed class Responses {
     ) : Responses()
 }
 
-data class MediaType(
+internal data class MediaType(
         val schema: Schemas? = null,
         val example: Any? = null,
         val examples: Map<String, Examples>? = null,
         val encoding: Map<String, Encoding>? = null
 )
 
-data class Encoding(
+internal data class Encoding(
         val contentType: String? = null,
         val headers: Map<String, Headers>? = null,
         val style: String? = null,
@@ -163,18 +162,18 @@ data class Encoding(
         val allowReserved: Boolean? = null
 )
 
-sealed class Headers {
-    data class Reference(override val `$ref`: String) : Headers(), Ref
-    data class Header(
+internal sealed class Headers {
+    internal data class Reference(override val `$ref`: String) : Headers(), Ref
+    internal data class Header(
             val name: String,
             val description: String? = null,
             val externalDocs: ExternalDocumentation? = null
     ) : Headers()
 }
 
-sealed class Links {
-    data class Reference(override val `$ref`: String) : Links(), Ref
-    data class Link(
+internal sealed class Links {
+    internal data class Reference(override val `$ref`: String) : Links(), Ref
+    internal data class Link(
             val operationRef: String? = null,
             val operationId: String? = null,
             val parameters: Map<String, Any>? = null,
@@ -184,13 +183,13 @@ sealed class Links {
     ) : Links()
 }
 
-enum class ParameterType { query, header, path, cookie }
-sealed class Parameters {
-    data class Reference(override val `$ref`: String) : Parameters(), Ref
+internal enum class ParameterType { query, header, path, cookie }
+internal sealed class Parameters {
+    internal data class Reference(override val `$ref`: String) : Parameters(), Ref
 
     abstract class Parameter() : Parameters()
 
-    data class QueryParameter(
+    internal data class QueryParameter(
             val name: String,
             val required: Boolean,
             val schema: Schemas,
@@ -201,7 +200,7 @@ sealed class Parameters {
         val `in`: ParameterType = ParameterType.query
     }
 
-    data class HeaderParameter(
+    internal data class HeaderParameter(
             val name: String,
             val required: Boolean,
             val schema: Schemas,
@@ -211,7 +210,7 @@ sealed class Parameters {
         val `in`: ParameterType = ParameterType.header
     }
 
-    data class PathParameter(
+    internal data class PathParameter(
             val name: String,
             val schema: Schemas,
             val description: String? = null,
@@ -221,7 +220,7 @@ sealed class Parameters {
         val required = true
     }
 
-    data class CookieParameter(
+    internal data class CookieParameter(
             val name: String,
             val required: Boolean,
             val schema: Schemas,
@@ -232,9 +231,9 @@ sealed class Parameters {
     }
 }
 
-sealed class Examples {
-    data class Reference(override val `$ref`: String) : Examples(), Ref
-    data class Example(
+internal sealed class Examples {
+    internal data class Reference(override val `$ref`: String) : Examples(), Ref
+    internal data class Example(
             val summary: String? = null,
             val description: String? = null,
             val value: Any? = null,
@@ -242,16 +241,16 @@ sealed class Examples {
     )
 }
 
-sealed class RequestBodies {
-    data class Reference(override val `$ref`: String) : RequestBodies(), Ref
-    data class RequestBody(
+internal sealed class RequestBodies {
+    internal data class Reference(override val `$ref`: String) : RequestBodies(), Ref
+    internal data class RequestBody(
             val description: String? = null,
             val content: Map<String, MediaType>,
             val required: Boolean? = null
     ) : RequestBodies()
 }
 
-data class Path(
+internal data class Path(
         val `$ref`: String? = null,
         val summary: String? = null,
         val description: String? = null,
@@ -268,7 +267,7 @@ data class Path(
 )
 
 
-data class Operation(
+internal data class Operation(
         val responses: Map<String, Responses>,
         val tags: List<String>? = null,
         val summary: String? = null,
@@ -283,33 +282,33 @@ data class Operation(
 )
 
 
-data class Contact(val name: String? = null, val url: String? = null, val email: String? = null)
-data class License(val name: String, val url: String? = null)
-data class Server(val url: String, val description: String? = null, val variables: Map<String, ServerVariable>? = null)
-data class ServerVariable(val default: String, val enum: List<String>? = null, val description: String? = null)
-data class Tag(val name: String, val description: String? = null, val externalDocs: ExternalDocumentation? = null)
-data class ExternalDocumentation(val url: String, val description: String? = null)
+internal data class Contact(val name: String? = null, val url: String? = null, val email: String? = null)
+internal data class License(val name: String, val url: String? = null)
+internal data class Server(val url: String, val description: String? = null, val variables: Map<String, ServerVariable>? = null)
+internal data class ServerVariable(val default: String, val enum: List<String>? = null, val description: String? = null)
+internal data class Tag(val name: String, val description: String? = null, val externalDocs: ExternalDocumentation? = null)
+internal data class ExternalDocumentation(val url: String, val description: String? = null)
 
-data class OAuthFlows(
+internal data class OAuthFlows(
         val implicit: OAuthFlow? = null,
         val password: OAuthFlow? = null,
         val clientCredentials: OAuthFlow? = null,
         val authorizationCode: OAuthFlow? = null
 )
 
-data class OAuthFlow(
+internal data class OAuthFlow(
         val authorizationUrl: String,
         val tokenUrl: String,
         val refreshUrl: String? = null,
         val scopes: Map<String, String>
 )
 
-sealed class SecuritySchemes {
-    enum class In { query, `header`, cookie }
-    enum class Type { apiKey, http, oauth2, openIdConnect }
+internal sealed class SecuritySchemes {
+    internal enum class In { query, `header`, cookie }
+    internal enum class Type { apiKey, http, oauth2, openIdConnect }
 
-    data class Reference(override val `$ref`: String) : SecuritySchemes(), Ref
-    data class SecurityScheme(
+    internal data class Reference(override val `$ref`: String) : SecuritySchemes(), Ref
+    internal data class SecurityScheme(
             val type: Type,
             val description: String? = null,
             val name: String,
@@ -321,7 +320,7 @@ sealed class SecuritySchemes {
     )
 }
 
-data class Info(
+internal data class Info(
         val title: String,
         val version: String,
         val description: String? = null,
@@ -329,6 +328,7 @@ data class Info(
         val contact: Contact? = null,
         val license: License? = null
 )
+
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 @Repeatable()

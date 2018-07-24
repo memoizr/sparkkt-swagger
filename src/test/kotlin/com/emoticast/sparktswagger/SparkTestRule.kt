@@ -15,11 +15,10 @@ val config = Config(description = "A test",
         host = "http://localhost:3000/$root",
         docPath = "spec",
         docExpansion = DocExpansion.LIST
-
 )
 
-open class SparkTestRule(val port: Int, val router: Router.() -> Unit = ServerRouter) : ExternalResource() {
-    val server = Server(config.copy(port = port))
+open class SparkTestRule(port: Int, val router: Router.() -> Unit = ServerRouter) : ExternalResource() {
+    val server = Snitch(config.copy(port = port))
 
     override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {
@@ -43,6 +42,6 @@ open class SparkTestRule(val port: Int, val router: Router.() -> Unit = ServerRo
     }
 
     override fun before() {
-        server.startWithRoutes(router)
+        server.setRoutes(router)
     }
 }

@@ -1,6 +1,7 @@
 package com.emoticast.sparktswagger
 
 import com.emoticast.extensions.json
+import com.emoticast.sparktswagger.HttpResponse.ErrorHttpResponse
 import org.junit.Rule
 import org.junit.Test
 import java.text.SimpleDateFormat
@@ -27,9 +28,9 @@ val qHead = headerParam(name = "q", description = "description", condition = Non
 val intHead = headerParam(name = "int", description = "description", condition = NonNegativeInt)
 val offsetHead = optionalHeaderParam(name = "offsetHead", description = "description", condition = NonNegativeInt, default = 666, emptyAsMissing = true)
 val limitHead = optionalHeaderParam(name = "limitHead", description = "description", condition = NonNegativeInt, emptyAsMissing = true)
-val queryParam = optionalQueryParam(name="param", description = "parameter", condition = NonEmptyString, default = "hey")
-val headerParam = optionalHeaderParam(name="param", description = "parameter", condition = NonEmptyString, default = "hey")
-val pathParam = pathParam(name="param", description = "parameter", condition = NonEmptyString)
+val queryParam = optionalQueryParam(name = "param", description = "parameter", condition = NonEmptyString, default = "hey")
+val headerParam = optionalHeaderParam(name = "param", description = "parameter", condition = NonEmptyString, default = "hey")
+val pathParam = pathParam(name = "param", description = "parameter", condition = NonEmptyString)
 
 val time = queryParam("time", description = "the time", condition = DateValidator)
 
@@ -65,6 +66,15 @@ class ParametersTest : SparkTest() {
         "" GET "sneakyqueryparams" isHandledBy { TestResult(request.get(queryParam)).ok }
         "" GET "sneakyheaderparams" isHandledBy { TestResult(request.get(headerParam)).ok }
         "" GET "sneakypathparams/:path" isHandledBy { TestResult(request.get(pathParam)).ok }
+
+        val function: Handler<BodyParam, BodyTestResult> = {
+            val sealed = body.sealed
+            BodyTestResult(body.int, when (sealed) {
+                is SealedClass.One -> sealed.oneInt
+                is SealedClass.Two -> 2
+            }).ok
+        }
+        "" POST "bodyparam" with body<BodyParam>() isHandledBy function
     }
 
     @Test
@@ -123,9 +133,15 @@ class ParametersTest : SparkTest() {
         whenPerform GET "/$root/headerspath4" expectBody "{}"
     }
 
+    val bodyParam = BodyParam(42, "hello", SealedClass.One(33))
+
+    @Test
+    fun `supports body parameter`() {
+        whenPerform POST "/$root/bodyparam" withBody bodyParam expectBody BodyTestResult(42, 33).json
+    }
+
     @Test
     fun `supports custom parsing`() {
-
         val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
         val date = "2018-06-30T02:59:51-00:00"
         whenPerform GET "/$root/customParsing?time=$date" expectBody DateResult(df.parse(date)).json
@@ -141,4 +157,12 @@ class ParametersTest : SparkTest() {
     data class IntTestResult(val result: Int)
     data class NullableIntTestResult(val result: Int?)
     data class DateResult(val date: Date)
+
+    data class BodyParam(val int: Int, val string: String, val sealed: SealedClass)
+    data class BodyTestResult(val a: Int, val b: Int)
+
+    sealed class SealedClass : Sealed() {
+        data class One(val oneInt: Int) : SealedClass()
+        object Two : SealedClass()
+    }
 }
