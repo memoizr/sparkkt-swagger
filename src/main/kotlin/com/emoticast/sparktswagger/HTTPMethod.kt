@@ -1,5 +1,5 @@
 package com.emoticast.sparktswagger
 
 enum class HTTPMethod {
-    GET, POST, PUT, DELETE, OPTIONS
+    GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
 }

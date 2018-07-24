@@ -1,5 +1,7 @@
 package com.emoticast.sparktswagger
 
+import com.emoticast.sparktswagger.documentation.TestClass
+
 val root = "home"
 val v1 = "/v1"
 val clips = "clips"
@@ -32,41 +34,49 @@ private val offset = optionalQueryParam(
         condition = NonNegativeInt)
 
 val ServerRouter: Router.() -> Unit = {
-    val getParametrizedGreeting: Controller<RequestBody, String> = { body.hello.plus("").ok }
+//    val getGreeting: Handler<Nothing, AResponse> = {
+//        request[query]
+//        AResponse(0, 0, 0, listOf(Query("hey")), FooEnum.A).ok
+//    }
 
-    val getGreeting: Controller<Nothing, String> = {
+    val getPathGreeting: Handler<Nothing, TestClass> = {
         request[query]
-        "hello".ok
+        (null!! as TestClass).ok
     }
 
-    "hello" GET "hey" isHandledBy getGreeting
+//    val getGreetingBody: Handler<RequestBody, AResponse> = {
+//        request[query]
+//        AResponse(0, 0, 0, listOf(Query("hey")), FooEnum.A).ok
+//    }
+
+//    "hello" GET "hey" with queries(query) isHandledBy getGreeting
 
     "List all clips" GET
-            v1 / clips / clipId with queries(length, offset, query) isHandledBy getGreeting
+            v1 / clips / clipId with queries(query, length, offset, query) isHandledBy getPathGreeting
 
-//        "Run a cute test" GET
-//                v1 / clips / clipId with queries(length, offset) with headers(name) isHandledBy ::getClips
-//
+        "Run a cute test" GET
+                v1 / clips / clipId with queries(query, length, offset) with headers(name) isHandledBy getPathGreeting
+
 //        "Run a cute test 2" POST
-//                v1 / clips / clipId with queries(length, offset) with headers(name) with body<RequestBody>() isHandledBy ::getClips
-//
-//        "Run a cute test 2" PUT
-//                v1 / clips / clipId with queries(length, offset) with headers(name) isHandledBy ::getClips
-//
-//        "Run a cute test 2" DELETE
-//                v1 / clips / clipId with queries(length, offset) with headers(name) isHandledBy ::getClips
+//                v1 / clips / clipId with queries(query, length, offset) with headers(name) with body<RequestBody>() isHandledBy getGreetingBody
+
+        "Run a cute test 2" PUT
+                v1 / clips / clipId with queries(query, length, offset) with headers(name) isHandledBy getPathGreeting
+
+        "Run a cute test 2" DELETE
+                v1 / clips / clipId with queries(query, length, offset) with headers(name) isHandledBy getPathGreeting
 
 }
-
-//fun getClips(request: Request, response: Response): AResponse {
-//    return AResponse(request[clipId], request[length], request[offset], listOf(Query(request[query])), FooEnum.A)
-//}
 
 enum class FooEnum {
     A, B, C, D
 }
 
-data class Query(val value: String)
-data class AResponse(val clipId: Int, val length: Int, val offset: Int, val queries: List<Query>?, val enum: FooEnum)
+//data class Query(val value: String)
+//data class AResponse(
+//        @Description("a clip id foo")
+//        val clipId: Int, val length: Int,
+//        @Description("offset yo")
+//        val offset: Int, val queries: List<Query>?, val enum: FooEnum)
 
-data class RequestBody(val hello: String)
+//data class RequestBody(val hello: String)

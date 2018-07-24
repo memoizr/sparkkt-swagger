@@ -1,6 +1,7 @@
 package com.emoticast.sparktswagger
 
 import com.emoticast.extensions.json
+import com.emoticast.sparktswagger.HttpResponse.ErrorHttpResponse
 import org.junit.Rule
 import org.junit.Test
 
@@ -18,16 +19,14 @@ class ValidationsTest: SparkTest() {
             request[allowInvalidHeader]
             request[allowInvalidQuery]
             "ok".ok }
-
     }
 
     @Test
     fun `validates routes`() {
-
         whenPerform GET "/$root/foo/3456" expectCode 200
-        whenPerform GET "/$root/foo/hey" expectBody ClientError(400, listOf("""Path parameter `id` is invalid, expecting non negative integer, got `hey`""")).json expectCode 400
-        whenPerform GET "/$root/foo/134?offset=-34" expectBody ClientError(400, listOf("""Query parameter `offset` is invalid, expecting non negative integer, got `-34`""")).json expectCode 400
-        whenPerform GET "/$root/foo/134?offset=a" expectBody ClientError(400, listOf("""Query parameter `offset` is invalid, expecting non negative integer, got `a`""")).json expectCode 400
+        whenPerform GET "/$root/foo/hey" expectBody ErrorHttpResponse<Any>(400, listOf("""Path parameter `id` is invalid, expecting non negative integer, got `hey`""")).json expectCode 400
+        whenPerform GET "/$root/foo/134?offset=-34" expectBody ErrorHttpResponse<Any>(400, listOf("""Query parameter `offset` is invalid, expecting non negative integer, got `-34`""")).json expectCode 400
+        whenPerform GET "/$root/foo/134?offset=a" expectBody ErrorHttpResponse<Any>(400, listOf("""Query parameter `offset` is invalid, expecting non negative integer, got `a`""")).json expectCode 400
         whenPerform GET "/$root/foo/134?allowInvalidQuery=a" expectCode 200
         whenPerform GET "/$root/foo/134" withHeaders mapOf(allowInvalidHeader.name to "boo") expectCode 200
     }
