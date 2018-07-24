@@ -40,7 +40,11 @@ private fun objectSchema(klass: KClass<*>): Schemas.ObjectSchema {
                             when (schema) {
                                 is Schemas.ArraySchema -> schema.apply {
                                     description = desc?.description
-                                    example = if (desc?.exEmptyList != null && desc.exEmptyList) listOf<Any>() else null
+                                    example = when {
+                                        desc?.exEmptyList != null && desc.exEmptyList -> listOf<Any>()
+                                        Sealed::class.java.isAssignableFrom(param.type.arguments.first().type?.jvmErasure?.java) -> listOf(getExample(param.type.arguments.first().type!!))
+                                        else -> null
+                                    }
                                 }
                                 is Schemas.StringSchema -> schema.apply {
                                     description = desc?.description

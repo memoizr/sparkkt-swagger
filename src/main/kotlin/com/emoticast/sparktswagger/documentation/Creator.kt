@@ -43,7 +43,8 @@ data class TestClass(
         val aListBoolean: List<Boolean>,
         val anObjectList: List<SimpleObject>,
         val theEnum: ClassicEnum,
-        val aSeal: MySeal
+        val aSeal: MySeal,
+        val moreSeals: List<MySeal>
 )
 
 data class SimpleObject(
