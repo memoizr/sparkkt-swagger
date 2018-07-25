@@ -27,7 +27,7 @@ fun Router.generateDocs(): String {
                                     }
                                     .let {
                                         bundle.endpoint.headerParams.fold(it) { acc, p ->
-                                            it.withParameter(Parameters.HeaderParameter(
+                                            acc.withParameter(Parameters.HeaderParameter(
                                                     name = p.name,
                                                     required = p.required,
                                                     description = getDescription(p),
@@ -38,7 +38,7 @@ fun Router.generateDocs(): String {
                                     }
                                     .let {
                                         bundle.endpoint.pathParams.fold(it) { acc, param ->
-                                            it.withParameter(Parameters.PathParameter(
+                                            acc.withParameter(Parameters.PathParameter(
                                                     name = param.name,
                                                     description = getDescription(param),
                                                     schema = toSchema(param.type.kotlin.starProjectedType).withPattern(param.pattern.regex)
@@ -47,7 +47,7 @@ fun Router.generateDocs(): String {
                                     }
                                     .let {
                                         bundle.endpoint.queryParams.fold(it) { acc, p ->
-                                            it.withParameter(Parameters.QueryParameter(
+                                            acc.withParameter(Parameters.QueryParameter(
                                                     name = p.name,
                                                     description = getDescription(p),
                                                     allowEmptyValue = p.emptyAsMissing,
