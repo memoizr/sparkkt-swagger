@@ -7,7 +7,7 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlin.reflect.full.starProjectedType
 
-fun Router.generateDocs(): String {
+fun Router.generateDocs(): Spec {
     val openApi = OpenApi(info = Info(config.title, "1"), servers = listOf(Server(config.host)))
     return endpoints
             .groupBy { it.endpoint.url }
@@ -59,14 +59,21 @@ fun Router.generateDocs(): String {
                                     }
                     )
                 }
-            }.fold(openApi) { a, b -> a.withPath(b.first, b.second) }.apply {
-                copyResourceToFile("index.html", destination)
-                copyResourceToFile("swagger-ui.css", destination)
-                copyResourceToFile("swagger-ui.js", destination)
-                copyResourceToFile("swagger-ui-bundle.js", destination)
-                copyResourceToFile("swagger-ui-standalone-preset.js", destination)
-                writeToFile(this.json, "$destination/${config.docPath}.json")
-            }.json
+            }.fold(openApi) { a, b -> a.withPath(b.first, b.second) }
+            .let {  Spec(it.json, this) }
+}
+
+data class Spec(val spec: String, val router: Router) {
+
+    fun writeToFile() {
+        val dest = router.destination + "/docs"
+        copyResourceToFile("index.html", dest)
+        copyResourceToFile("swagger-ui.css", dest)
+        copyResourceToFile("swagger-ui.js", dest)
+        copyResourceToFile("swagger-ui-bundle.js", dest)
+        copyResourceToFile("swagger-ui-standalone-preset.js", dest)
+        writeToFile(spec, "$dest/spec.json")
+    }
 }
 
 private fun getDescription(param: Parameter<*>) =

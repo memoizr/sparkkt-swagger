@@ -13,7 +13,7 @@ class Router(val config: Config, val service: Service) {
     data class EndpointBundle<T : Any>(val endpoint: Endpoint<T>, val response: KClass<*>, val function: (Request, Response) -> String)
 
     val endpoints = mutableListOf<EndpointBundle<*>>()
-    val destination = "/tmp/swagger-ui/${config.basePath}"
+    val destination = "/tmp/swagger-ui"
 
     init {
         service.externalStaticFileLocation(destination)
