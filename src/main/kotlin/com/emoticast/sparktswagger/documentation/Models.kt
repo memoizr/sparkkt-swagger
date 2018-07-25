@@ -27,10 +27,19 @@ internal data class Components(
 internal interface Ref {
     val `$ref`: String
 }
+
 internal sealed class Schemas {
-    internal abstract class BaseSchema<T: Any>(
+    fun withPattern(pattern: Regex?): Schemas {
+        return when (this) {
+            is BaseSchema<*> -> this.apply { this.pattern = pattern?.pattern }
+            else -> this
+        }
+    }
+
+    internal abstract class BaseSchema<T : Any>(
             open val type: DataType,
             open val format: Format? = null,
+            var pattern: String? = null,
             var nullable: Boolean? = null
     ) : Schemas() {
         abstract var description: String?
@@ -49,7 +58,6 @@ internal sealed class Schemas {
     internal data class StringSchema(
             override var description: String? = null,
             val default: String? = null,
-            val pattern: String? = null,
             var example: Any? = null,
             val enum: List<String>? = null
     ) : BaseSchema<String>(type = DataType.string)
@@ -113,7 +121,6 @@ internal sealed class Schemas {
 
     internal data class PasswordSchema(
             override var description: String? = null,
-            val pattern: String? = null,
             val default: String? = null
     ) : BaseSchema<String>(type = DataType.string, format = Format.password)
 
@@ -332,11 +339,12 @@ internal data class Info(
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 @Repeatable()
-annotation class Description(val description: String,
+annotation class Description(val description: String = "",
                              val exString: String = "",
                              val exInt: Int = 0,
                              val exLong: Long = 0,
                              val exFloat: Float = 0.0f,
                              val exDouble: Double = 0.0,
-                             val exEmptyList: Boolean = false)
+                             val exEmptyList: Boolean = false,
+                             val pattern: String = "")
 

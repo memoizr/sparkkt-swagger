@@ -1,7 +1,7 @@
 package com.emoticast.sparktswagger
 
-import com.emoticast.extensions.json
-import com.emoticast.extensions.toHashMap
+import com.emoticast.sparktswagger.extensions.json
+import com.emoticast.sparktswagger.extensions.toHashMap
 import com.memoizr.assertk.expect
 import org.json.JSONObject
 import java.util.*

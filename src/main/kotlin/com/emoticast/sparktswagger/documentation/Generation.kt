@@ -1,7 +1,10 @@
 package com.emoticast.sparktswagger.documentation
 
-import com.emoticast.extensions.json
+import com.emoticast.sparktswagger.Parameter
 import com.emoticast.sparktswagger.Router
+import com.emoticast.sparktswagger.extensions.json
+import java.io.File
+import java.io.FileOutputStream
 import kotlin.reflect.full.starProjectedType
 
 fun Router.generateDocs(): String {
@@ -9,47 +12,47 @@ fun Router.generateDocs(): String {
     return endpoints
             .groupBy { it.endpoint.url }
             .map {
-                it.key to it.value.foldRight(Path()) { a: Router.EndpointBundle<*>, path ->
+                it.key to it.value.foldRight(Path()) { bundle: Router.EndpointBundle<*>, path ->
                     path.withOperation(
-                            a.endpoint.httpMethod,
+                            bundle.endpoint.httpMethod,
                             Operation(
-                                    tags = a.endpoint.url.split("/").drop(2).firstOrNull()?.let { listOf(it) },
-                                    summary = a.endpoint.description,
+                                    tags = bundle.endpoint.url.split("/").drop(2).firstOrNull()?.let { listOf(it) },
+                                    summary = bundle.endpoint.description,
                                     responses = emptyMap())
-                                    .withResponse(ContentType.APPLICATION_JSON, a.response, "200")
+                                    .withResponse(ContentType.APPLICATION_JSON, bundle.response, "200")
                                     .let {
-                                        if (a.endpoint.body.klass != Nothing::class) {
-                                            it.withRequestBody(ContentType.APPLICATION_JSON, a.endpoint.body.klass)
+                                        if (bundle.endpoint.body.klass != Nothing::class) {
+                                            it.withRequestBody(ContentType.APPLICATION_JSON, bundle.endpoint.body.klass)
                                         } else it
                                     }
                                     .let {
-                                        a.endpoint.headerParams.fold(it) { acc, p ->
+                                        bundle.endpoint.headerParams.fold(it) { acc, p ->
                                             it.withParameter(Parameters.HeaderParameter(
                                                     name = p.name,
                                                     required = p.required,
-                                                    description = p.description,
-                                                    schema = toSchema(p.type.kotlin.starProjectedType)
+                                                    description = getDescription(p),
+                                                    schema = toSchema(p.type.kotlin.starProjectedType).withPattern(p.pattern.regex)
 
                                             ))
                                         }
                                     }
                                     .let {
-                                        a.endpoint.pathParams.fold(it) { acc, p ->
+                                        bundle.endpoint.pathParams.fold(it) { acc, param ->
                                             it.withParameter(Parameters.PathParameter(
-                                                    name = p.name,
-                                                    description = p.description,
-                                                    schema = toSchema(p.type.kotlin.starProjectedType)
+                                                    name = param.name,
+                                                    description = getDescription(param),
+                                                    schema = toSchema(param.type.kotlin.starProjectedType).withPattern(param.pattern.regex)
                                             ))
                                         }
                                     }
                                     .let {
-                                        a.endpoint.queryParams.fold(it) { acc, p ->
+                                        bundle.endpoint.queryParams.fold(it) { acc, p ->
                                             it.withParameter(Parameters.QueryParameter(
                                                     name = p.name,
-                                                    description = p.description,
+                                                    description = getDescription(p),
                                                     allowEmptyValue = p.emptyAsMissing,
                                                     required = p.required,
-                                                    schema = toSchema(p.type.kotlin.starProjectedType)
+                                                    schema = toSchema(p.type.kotlin.starProjectedType).withPattern(p.pattern.regex)
 
                                             ))
                                         }
@@ -64,4 +67,29 @@ fun Router.generateDocs(): String {
                 copyResourceToFile("swagger-ui-standalone-preset.js", destination)
                 writeToFile(this.json, "$destination/${config.docPath}.json")
             }.json
+}
+
+private fun getDescription(param: Parameter<*>) =
+        "${param.description} - ${param.pattern.description}${if (param.invalidAsMissing) " - Invalid as Missing" else ""}${if (param.emptyAsMissing) " - Empty as Missing" else ""}"
+
+internal fun writeToFile(content: String, destination: String) {
+    File(destination.split("/").dropLast(1).joinToString("")).apply { if (!exists()) mkdirs() }
+    content.byteInputStream().use { input ->
+        FileOutputStream(destination).use { output ->
+            input.copyTo(output)
+        }
+    }
+}
+
+internal fun copyResourceToFile(resourceName: String, destination: String) {
+    val stream = ClassLoader.getSystemClassLoader().getResourceAsStream(resourceName)
+            ?: throw Exception("Cannot get resource \"$resourceName\" from Jar file.")
+    val s = "$destination/$resourceName"
+    File(destination).apply { if (!exists()) mkdirs() }
+    val resStreamOut = FileOutputStream(s)
+    stream.use { input ->
+        resStreamOut.use { output ->
+            input.copyTo(output)
+        }
+    }
 }

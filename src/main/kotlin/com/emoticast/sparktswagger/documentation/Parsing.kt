@@ -23,6 +23,7 @@ internal fun toSchema(type: KType): Schemas {
         klass.java.isEnum -> Schemas.StringSchema(enum = klass.java.enumConstants.map { it.toString() })
         klass.isSealed && Sealed::class.java.isAssignableFrom(klass.java) -> sealedSchema(klass, type)
         klass.objectInstance != null -> Schemas.ObjectSchema()
+        klass.primaryConstructor == null -> Schemas.StringSchema()
         else -> objectSchema(klass)
     }
     return schema.apply {
@@ -42,32 +43,38 @@ private fun objectSchema(klass: KClass<*>): Schemas.ObjectSchema {
                                     description = desc?.description
                                     example = when {
                                         desc?.exEmptyList != null && desc.exEmptyList -> listOf<Any>()
-                                        Sealed::class.java.isAssignableFrom(param.type.arguments.first().type?.jvmErasure?.java) -> listOf(getExample(param.type.arguments.first().type!!))
                                         else -> null
                                     }
+                                    pattern = desc?.pattern
                                 }
                                 is Schemas.StringSchema -> schema.apply {
                                     description = desc?.description
                                     example = desc?.exString?.nullIfEmpty()
+                                    pattern = desc?.pattern
                                 }
                                 is Schemas.FloatSchema -> schema.apply {
                                     description = desc?.description
                                     example = desc?.exFloat?.nullIfZero()
+                                    pattern = desc?.pattern
                                 }
                                 is Schemas.DoubleSchema -> schema.apply {
                                     description = desc?.description
                                     example = desc?.exDouble?.nullIfZero()
+                                    pattern = desc?.pattern
                                 }
                                 is Schemas.IntSchema -> schema.apply {
                                     description = desc?.description
                                     example = desc?.exInt?.nullIfZero()
+                                    pattern = desc?.pattern
                                 }
                                 is Schemas.LongSchema -> schema.apply {
                                     description = desc?.description
                                     example = desc?.exLong?.nullIfZero()
+                                    pattern = desc?.pattern
                                 }
                                 is Schemas.BaseSchema<*> -> schema.apply {
                                     description = desc?.description
+                                    pattern = desc?.pattern
                                 }
                                 else -> schema
                             }

@@ -1,7 +1,7 @@
 package com.emoticast.sparktswagger
 
-import com.emoticast.extensions.json
 import com.emoticast.sparktswagger.HttpResponse.ErrorHttpResponse
+import com.emoticast.sparktswagger.extensions.json
 import org.junit.Rule
 import org.junit.Test
 

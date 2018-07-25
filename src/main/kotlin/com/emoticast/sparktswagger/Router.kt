@@ -1,7 +1,7 @@
 package com.emoticast.sparktswagger
 
-import com.emoticast.extensions.json
 import com.emoticast.sparktswagger.documentation.ContentType
+import com.emoticast.sparktswagger.extensions.json
 import com.google.gson.Gson
 import spark.Request
 import spark.Response

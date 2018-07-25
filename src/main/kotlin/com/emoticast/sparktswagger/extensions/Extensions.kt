@@ -1,4 +1,4 @@
-package com.emoticast.extensions
+package com.emoticast.sparktswagger.extensions
 
 import com.emoticast.sparktswagger.Sealed
 import com.google.gson.Gson

@@ -1,6 +1,6 @@
 package com.emoticast.sparktswagger
 
-import com.emoticast.extensions.gson
+import com.emoticast.sparktswagger.extensions.gson
 import com.google.gson.Gson
 import spark.Request
 import spark.Response
