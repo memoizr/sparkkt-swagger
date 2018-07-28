@@ -14,7 +14,7 @@ object NonEmptyString : Validator<String> {
 
 object NonEmptyStringSet : Validator<Set<String>> {
     override val description = "non empty string set"
-    override val regex = """^(.+,?)*\w+$""".toRegex()
+    override val regex = """^(.+,?)*.+$""".toRegex()
     override val parse: (String) -> Set<String> = { it.split(",").toSet() }
 }
 
