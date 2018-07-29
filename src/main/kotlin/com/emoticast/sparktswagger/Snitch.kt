@@ -9,6 +9,7 @@ class Snitch(val config: Config = Config()) {
 
 
     fun setRoutes(routerConfiguration: Router.() -> Unit): Router {
+        http.externalStaticFileLocation("/tmp/swagger-ui")
         val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
         logger.level = config.logLevel
 
@@ -19,7 +20,6 @@ class Snitch(val config: Config = Config()) {
     }
 
     fun Router.startListening() {
-        service.externalStaticFileLocation("/tmp/swagger-ui")
 
         endpoints.forEach {
             val path = config.basePath + it.endpoint.url.replace("/{", "/:").replace("}", "")
