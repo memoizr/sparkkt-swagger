@@ -15,30 +15,37 @@ class Router(val config: Config, val service: Service) {
 
     val endpoints = mutableListOf<EndpointBundle<*>>()
 
+    fun GET() = Endpoint(HTTPMethod.GET, null, null, "", emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun GET(path: String) = Endpoint(HTTPMethod.GET, null, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun GET(path: PathParam<out Any>) = GET("" / path)
     infix fun GET(path: ParametrizedPath) = Endpoint(HTTPMethod.GET, null, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
 
+    fun POST() = Endpoint(HTTPMethod.POST, null, null, "", emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun POST(path: String) = Endpoint(HTTPMethod.POST, null, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun POST(path: PathParam<out Any>) = POST("" / path)
     infix fun POST(path: ParametrizedPath) = Endpoint(HTTPMethod.POST, null, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
 
+    fun PUT() = Endpoint(HTTPMethod.PUT, null, null, "", emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun PUT(path: String) = Endpoint(HTTPMethod.PUT, null, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun PUT(path: PathParam<out Any>) = PUT("" / path)
     infix fun PUT(path: ParametrizedPath) = Endpoint(HTTPMethod.PUT, null, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
 
+    fun DELETE() = Endpoint(HTTPMethod.DELETE, null, null, "", emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun DELETE(path: String) = Endpoint(HTTPMethod.DELETE, null, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun DELETE(path: PathParam<out Any>) = DELETE("" / path)
     infix fun DELETE(path: ParametrizedPath) = Endpoint(HTTPMethod.DELETE, null, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
 
+    fun OPTIONS() = Endpoint(HTTPMethod.OPTIONS, null, null, "", emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun OPTIONS(path: String) = Endpoint(HTTPMethod.OPTIONS, null, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun OPTIONS(path: PathParam<out Any>) = OPTIONS("" / path)
     infix fun OPTIONS(path: ParametrizedPath) = Endpoint(HTTPMethod.OPTIONS, null, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
 
+    fun HEAD() = Endpoint(HTTPMethod.HEAD, null, null, "", emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun HEAD(path: String) = Endpoint(HTTPMethod.HEAD, null, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun HEAD(path: PathParam<out Any>) = HEAD("" / path)
     infix fun HEAD(path: ParametrizedPath) = Endpoint(HTTPMethod.HEAD, null, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
 
+    fun PATCH() = Endpoint(HTTPMethod.PATCH, null, null, "", emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun PATCH(path: String) = Endpoint(HTTPMethod.PATCH, null, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun PATCH(path: PathParam<out Any>) = PATCH("" / path)
     infix fun PATCH(path: ParametrizedPath) = Endpoint(HTTPMethod.PATCH, null, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
@@ -78,8 +85,8 @@ class Router(val config: Config, val service: Service) {
     operator fun String.div(block: Router.() -> Unit) {
         val router = Router(config, service)
         router.block()
-        router.endpoints += router.endpoints.map { EndpointBundle(it.endpoint.copy(url = this.leadingSlash + it.endpoint.url), it.response, it.function) }
-        endpoints += router.endpoints
+        endpoints += router.endpoints.map { EndpointBundle(it.endpoint.copy(url = this.leadingSlash + it.endpoint.url), it.response, it.function) }
+//        endpoints += router.endpoints
     }
 
     operator fun ParametrizedPath.div(block: Router.() -> Unit) {

@@ -1,5 +1,6 @@
 package com.emoticast.sparktswagger
 
+import com.emoticast.sparktswagger.extensions.json
 import org.junit.Rule
 import org.junit.Test
 
@@ -46,9 +47,11 @@ class SimplePathBuilderTest : SparkTest() {
         }
 
         "v1" / {
-            "foo" GET clipId isHandledBy { TestResult("get value").ok }
+            GET() isHandledBy { TestResult("get value").ok }
+            http GET clipId isHandledBy { TestResult("get value").ok }
             "foo" GET "one" / clipId isHandledBy { TestResult("get value").ok }
         }
+        GET() isHandledBy { TestResult("get value").ok }
     }
 
 
@@ -61,6 +64,8 @@ class SimplePathBuilderTest : SparkTest() {
         whenPerform GET "/$root/hey/123/a" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/v1/123" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/v1/one/123" expectBodyJson TestResult("get value") expectCode 200
+        whenPerform GET "/$root/v1" expectBody  TestResult("get value").json expectCode 200
+        whenPerform GET "/$root" expectBody  TestResult("get value").json expectCode 200
     }
 
     @Test
