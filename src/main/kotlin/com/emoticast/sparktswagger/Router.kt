@@ -38,14 +38,14 @@ class Router(val config: Config, val service: Service) {
     operator fun String.div(path: String) = this.leadingSlash + "/" + path
     operator fun String.div(path: PathParam<out Any>) = ParametrizedPath(this + "/{${path.name}}", setOf(path))
 
-    operator fun String.invoke(block: Router.() -> Unit) {
+    operator fun String.div(block: Router.() -> Unit) {
         val router = Router(config, service)
         router.block()
         router.endpoints += router.endpoints.map { EndpointBundle(it.endpoint.copy(url = this.leadingSlash + it.endpoint.url), it.response, it.function) }
         endpoints += router.endpoints
     }
 
-    operator fun ParametrizedPath.invoke(block: Router.() -> Unit) {
+    operator fun ParametrizedPath.div(block: Router.() -> Unit) {
         val router = Router(config, service)
         router.block()
         router.endpoints += router.endpoints.map { EndpointBundle(it.endpoint.copy(url = this.path.leadingSlash + it.endpoint.url, pathParams = it.endpoint.pathParams + this.pathParameters), it.response, it.function) }

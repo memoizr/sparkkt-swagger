@@ -26,23 +26,23 @@ class SimplePathBuilderTest: SparkTest() {
         "foo" POST "infixslash" / "bar" isHandledBy { TestResult("success").ok }
         "foo" DELETE "infixslash" / "bar" isHandledBy { TestResult("success").ok }
 
-        "one" {
+        "one" / {
             "foo" GET "/a" isHandledBy { TestResult("get value").ok }
             "foo" GET "/b" isHandledBy { TestResult("get value").ok }
-            "two" {
+            "two" / {
                 "foo" GET "/c" isHandledBy { TestResult("get value").ok }
             }
         }
 
-        ("hey" / "there") {
+        "hey" / "there" / {
             "foo" GET "/a" isHandledBy { TestResult("get value").ok }
         }
 
-        ("hey" / clipId) {
+        "hey" / clipId / {
             "foo" GET "/a" isHandledBy { TestResult("get value").ok }
         }
 
-        "v1" {
+        "v1" / {
             "foo" GET clipId isHandledBy { TestResult("get value").ok }
         }
     }
