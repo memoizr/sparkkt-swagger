@@ -74,11 +74,11 @@ data class QueryParam<T>(
         override val invalidAsMissing: Boolean
 ) : QueryParameter<T>(type, name, pattern, description, true, emptyAsMissing, invalidAsMissing)
 
-inline fun <reified T> optionalQueryParam(name: String,
-                           description: String,
-                           condition: Validator<T>,
-                           emptyAsMissing: Boolean = false,
-                           invalidAsMissing: Boolean = false) =
+inline fun <reified T> optionalQuery(name: String,
+                                     description: String,
+                                     condition: Validator<T>,
+                                     emptyAsMissing: Boolean = false,
+                                     invalidAsMissing: Boolean = false) =
         OptionalQueryParam(
                 T::class.java,
                 name,
@@ -89,12 +89,12 @@ inline fun <reified T> optionalQueryParam(name: String,
                 invalidAsMissing = invalidAsMissing
         )
 
-inline fun <reified T> optionalQueryParam(name: String,
-                           description: String,
-                           condition: Validator<T>,
-                           default: T,
-                           emptyAsMissing: Boolean = false,
-                           invalidAsMissing: Boolean = false) =
+inline fun <reified T> optionalQuery(name: String,
+                                     description: String,
+                                     condition: Validator<T>,
+                                     default: T,
+                                     emptyAsMissing: Boolean = false,
+                                     invalidAsMissing: Boolean = false) =
         OptionalQueryParam(
                 T::class.java,
                 name,
@@ -105,11 +105,11 @@ inline fun <reified T> optionalQueryParam(name: String,
                 invalidAsMissing = invalidAsMissing
         )
 
-inline fun <reified T> queryParam(name: String,
-                   description: String,
-                   condition: Validator<T>,
-                   emptyAsMissing: Boolean = false,
-                   invalidAsMissing: Boolean = false) =
+inline fun <reified T> query(name: String,
+                             description: String,
+                             condition: Validator<T>,
+                             emptyAsMissing: Boolean = false,
+                             invalidAsMissing: Boolean = false) =
         QueryParam(
                 T::class.java,
                 name,
@@ -119,7 +119,7 @@ inline fun <reified T> queryParam(name: String,
                 invalidAsMissing = invalidAsMissing
         )
 
-inline fun <reified T> optionalHeaderParam(
+inline fun <reified T> optionalHeader(
         name: String,
         description: String,
         condition: Validator<T>,
@@ -135,7 +135,7 @@ inline fun <reified T> optionalHeaderParam(
                 invalidAsMissing = invalidAsMissing
         )
 
-inline fun <reified T> optionalHeaderParam(
+inline fun <reified T> optionalHeader(
         name: String,
         description: String,
         condition: Validator<T>,
@@ -152,7 +152,7 @@ inline fun <reified T> optionalHeaderParam(
                 invalidAsMissing = invalidAsMissing
         )
 
-inline fun <reified T> headerParam(
+inline fun <reified T> header(
         name: String,
         description: String,
         condition: Validator<T>,
@@ -167,7 +167,7 @@ inline fun <reified T> headerParam(
         invalidAsMissing = invalidAsMissing
 )
 
-inline fun <reified T> pathParam(name: String, description: String, condition: Validator<T>) = PathParam(
+inline fun <reified T> path(name: String, description: String, condition: Validator<T>) = PathParam(
         null,
         T::class.java,
         name,

@@ -17,7 +17,8 @@ fun Router.generateDocs(): Spec {
                             bundle.endpoint.httpMethod,
                             Operation(
                                     tags = bundle.endpoint.url.split("/").drop(2).firstOrNull()?.let { listOf(it) },
-                                    summary = bundle.endpoint.description,
+                                    summary = bundle.endpoint.summary,
+                                    description = bundle.endpoint.description,
                                     responses = emptyMap())
                                     .withResponse(ContentType.APPLICATION_JSON, bundle.response, "200")
                                     .let {
@@ -65,7 +66,7 @@ fun Router.generateDocs(): Spec {
 
 data class Spec(val spec: String, val router: Router) {
 
-    fun writeToFile() {
+    fun writeDocsToStaticFolder() {
         val dest = "/tmp/swagger-ui" + "/docs"
         copyResourceToFile("index.html", dest)
         copyResourceToFile("swagger-ui.css", dest)

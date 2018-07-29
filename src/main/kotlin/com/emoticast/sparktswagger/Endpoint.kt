@@ -2,20 +2,23 @@ package com.emoticast.sparktswagger
 
 import spark.Request
 
+data class OpDescription(val description: String)
 
 data class Endpoint<B : Any>(
         val httpMethod: HTTPMethod,
-        val description: String,
+        val summary: String?,
+        val description: String?,
         val url: String,
         val pathParams: Set<PathParam<out Any>>,
         val queryParams: Set<QueryParameter<*>>,
         val headerParams: Set<HeaderParameter<*>>,
         val body: Body<B>) {
 
-    infix fun with(queryParameter: QueryParameter<*>) = copy(queryParams = queryParams + queryParameter)
-    infix fun with(params: HeaderParameter<*>) = copy(headerParams = headerParams + params)
+    infix fun withQuery(queryParameter: QueryParameter<*>) = copy(queryParams = queryParams + queryParameter)
+    infix fun withHeader(params: HeaderParameter<*>) = copy(headerParams = headerParams + params)
     infix fun <C : Any> with(body: Body<C>) = Endpoint(
             httpMethod,
+            summary,
             description,
             url,
             pathParams,
@@ -29,11 +32,14 @@ data class Endpoint<B : Any>(
     private fun Request.getQueryParam(param: QueryParameter<*>) = queryParams(param.name).filterValid(param)
     private fun Request.getHeaderParam(param: HeaderParameter<*>) = headers(param.name).filterValid(param)
 
+    infix fun inSummary(summary: String) = copy(summary = summary)
+    infix fun isDescribedAs(description: String) = copy(description = description)
+
     infix fun with(queryParameter: List<Parameter<*>>) = let {
         queryParameter.foldRight(this) { param, endpoint ->
             when (param) {
-                is HeaderParameter -> endpoint with param
-                is QueryParameter -> endpoint with param
+                is HeaderParameter -> endpoint withHeader param
+                is QueryParameter -> endpoint withQuery param
                 else -> throw IllegalArgumentException(param.toString())
             }
         }

@@ -7,32 +7,32 @@ import org.junit.Test
 import java.text.SimpleDateFormat
 import java.util.*
 
-val stringParam = pathParam(
+val stringParam = path(
         name = "stringParam",
         description = "Description",
         condition = NonEmptyString
 )
 
-val intparam = pathParam(
+val intparam = path(
         name = "intParam",
         description = "Description",
         condition = NonNegativeInt
 )
 
-val q = queryParam(name = "q", description = "description", condition = NonEmptyString)
-val int = queryParam(name = "int", description = "description", condition = NonNegativeInt, emptyAsMissing = true)
-private val offset = optionalQueryParam(name = "offset", description = "description", condition = NonNegativeInt, default = 30)
-val limit = optionalQueryParam(name = "limit", description = "description", condition = NonNegativeInt)
+val q = query(name = "q", description = "description", condition = NonEmptyString)
+val int = query(name = "int", description = "description", condition = NonNegativeInt, emptyAsMissing = true)
+private val offset = optionalQuery(name = "offset", description = "description", condition = NonNegativeInt, default = 30)
+val limit = optionalQuery(name = "limit", description = "description", condition = NonNegativeInt)
 
-val qHead = headerParam(name = "q", description = "description", condition = NonEmptyString)
-val intHead = headerParam(name = "int", description = "description", condition = NonNegativeInt)
-val offsetHead = optionalHeaderParam(name = "offsetHead", description = "description", condition = NonNegativeInt, default = 666, emptyAsMissing = true)
-val limitHead = optionalHeaderParam(name = "limitHead", description = "description", condition = NonNegativeInt, emptyAsMissing = true)
-val queryParam = optionalQueryParam(name = "param", description = "parameter", condition = NonEmptyString, default = "hey")
-val headerParam = optionalHeaderParam(name = "param", description = "parameter", condition = NonEmptyString, default = "hey")
-val pathParam = pathParam(name = "param", description = "parameter", condition = NonEmptyString)
+val qHead = header(name = "q", description = "description", condition = NonEmptyString)
+val intHead = header(name = "int", description = "description", condition = NonNegativeInt)
+val offsetHead = optionalHeader(name = "offsetHead", description = "description", condition = NonNegativeInt, default = 666, emptyAsMissing = true)
+val limitHead = optionalHeader(name = "limitHead", description = "description", condition = NonNegativeInt, emptyAsMissing = true)
+val queryParam = optionalQuery(name = "param", description = "parameter", condition = NonEmptyString, default = "hey")
+val headerParam = optionalHeader(name = "param", description = "parameter", condition = NonEmptyString, default = "hey")
+val pathParam = path(name = "param", description = "parameter", condition = NonEmptyString)
 
-val time = queryParam("time", description = "the time", condition = DateValidator)
+val time = query("time", description = "the time", condition = DateValidator)
 
 object DateValidator : Validator<Date> {
     override val description: String = "An iso 8601 format date"
@@ -51,7 +51,13 @@ class ParametersTest : SparkTest() {
             IntTestResult(request[intparam]).ok
         }
 
-        "" GET "queriespath" with queries(q) isHandledBy { TestResult(request[q]).ok }
+
+        GET("queriespath") inSummary "does a foo" withQuery q withHeader intHead isHandledBy { TestResult(request[q]).ok }
+
+        val query = query("q", "the query", NonEmptyString)
+
+        "" GET "queriespath" inSummary "does a foo" withQuery query isHandledBy { TestResult(request[query]).ok }
+
         "" GET "queriespath2" with queries(int) isHandledBy { IntTestResult(request[int]).ok }
         "" GET "queriespath3" with queries(offset) isHandledBy { IntTestResult(request[offset]).ok }
         "" GET "queriespath4" with queries(limit) isHandledBy { NullableIntTestResult(request[limit]).ok }

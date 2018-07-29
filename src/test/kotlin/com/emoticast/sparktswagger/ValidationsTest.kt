@@ -7,11 +7,11 @@ import org.junit.Test
 
 class ValidationsTest: SparkTest() {
 
-    val id = pathParam("id", "the id", NonNegativeInt)
-    val offset = optionalQueryParam("offset", "offset", condition = NonNegativeInt, default = 20, emptyAsMissing = true)
-    val allowInvalidQuery = optionalQueryParam("allowInvalidQuery", "allowInvalid", condition = NonNegativeInt, default = 20, emptyAsMissing = true, invalidAsMissing = true)
-    val allowInvalidHeader = optionalHeaderParam("allowInvalidHeader", "allowInvalid", condition = NonNegativeInt, default = 20, emptyAsMissing = true, invalidAsMissing = true)
-    val stringSet = optionalQueryParam("stringset", "stringset", condition = StringSet)
+    val id = path("id", "the id", NonNegativeInt)
+    val offset = optionalQuery("offset", "offset", condition = NonNegativeInt, default = 20, emptyAsMissing = true)
+    val allowInvalidQuery = optionalQuery("allowInvalidQuery", "allowInvalid", condition = NonNegativeInt, default = 20, emptyAsMissing = true, invalidAsMissing = true)
+    val allowInvalidHeader = optionalHeader("allowInvalidHeader", "allowInvalid", condition = NonNegativeInt, default = 20, emptyAsMissing = true, invalidAsMissing = true)
+    val stringSet = optionalQuery("stringset", "stringset", condition = StringSet)
 
     @Rule
     @JvmField val rule = SparkTestRule(port) {

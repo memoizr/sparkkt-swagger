@@ -46,7 +46,8 @@ data class RequestHandler<T : Any>(
 
 fun queries(vararg queryParameter: QueryParameter<*>) = queryParameter.asList()
 fun headers(vararg headerParameter: HeaderParameter<*>) = headerParameter.asList()
-inline fun <reified T : Any> body(customGson: Gson = gson) = Body(T::class, gson)
+fun description(description: String) = OpDescription(description)
+inline fun <reified T : Any> body(customGson: Gson = gson) = Body(T::class, customGson)
 
 fun String?.filterValid(param: Parameter<*>) = when {
     this == null -> null
