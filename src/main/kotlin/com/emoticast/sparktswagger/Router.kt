@@ -13,11 +13,7 @@ class Router(val config: Config, val service: Service) {
     data class EndpointBundle<T : Any>(val endpoint: Endpoint<T>, val response: KClass<*>, val function: (Request, Response) -> String)
 
     val endpoints = mutableListOf<EndpointBundle<*>>()
-    val destination = "/tmp/swagger-ui"
 
-    init {
-        service.externalStaticFileLocation(destination)
-    }
 
     infix fun String.GET(path: String) = Endpoint(HTTPMethod.GET, this, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun String.GET(path: PathParam<out Any>) = GET("" / path)

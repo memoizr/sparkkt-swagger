@@ -66,7 +66,7 @@ fun Router.generateDocs(): Spec {
 data class Spec(val spec: String, val router: Router) {
 
     fun writeToFile() {
-        val dest = router.destination + "/docs"
+        val dest = "/tmp/swagger-ui" + "/docs"
         copyResourceToFile("index.html", dest)
         copyResourceToFile("swagger-ui.css", dest)
         copyResourceToFile("swagger-ui.js", dest)

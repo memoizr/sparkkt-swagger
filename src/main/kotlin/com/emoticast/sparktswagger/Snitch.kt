@@ -19,6 +19,8 @@ class Snitch(val config: Config = Config()) {
     }
 
     fun Router.startListening() {
+        service.externalStaticFileLocation("/tmp/swagger-ui")
+
         endpoints.forEach {
             val path = config.basePath + it.endpoint.url.replace("/{", "/:").replace("}", "")
             when (it.endpoint.httpMethod) {
