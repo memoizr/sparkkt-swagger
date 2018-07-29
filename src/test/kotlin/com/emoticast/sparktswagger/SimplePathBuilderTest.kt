@@ -25,8 +25,38 @@ class SimplePathBuilderTest: SparkTest() {
         "foo" PUT "infixslash" / "bar" isHandledBy { TestResult("success").ok }
         "foo" POST "infixslash" / "bar" isHandledBy { TestResult("success").ok }
         "foo" DELETE "infixslash" / "bar" isHandledBy { TestResult("success").ok }
+
+        "one" {
+            "foo" GET "/a" isHandledBy { TestResult("get value").ok }
+            "foo" GET "/b" isHandledBy { TestResult("get value").ok }
+            "two" {
+                "foo" GET "/c" isHandledBy { TestResult("get value").ok }
+            }
+        }
+
+        ("hey" / "there") {
+            "foo" GET "/a" isHandledBy { TestResult("get value").ok }
+        }
+
+        ("hey" / clipId) {
+            "foo" GET "/a" isHandledBy { TestResult("get value").ok }
+        }
+
+        "v1" {
+            "foo" GET clipId isHandledBy { TestResult("get value").ok }
+        }
     }
 
+
+    @Test
+    fun `supports nested routes`() {
+        whenPerform GET "/$root/one/a" expectBodyJson TestResult("get value") expectCode 200
+        whenPerform GET "/$root/one/b" expectBodyJson TestResult("get value") expectCode 200
+        whenPerform GET "/$root/one/two/c" expectBodyJson TestResult("get value") expectCode 200
+        whenPerform GET "/$root/hey/there/a" expectBodyJson TestResult("get value") expectCode 200
+        whenPerform GET "/$root/hey/123/a" expectBodyJson TestResult("get value") expectCode 200
+        whenPerform GET "/$root/v1/123" expectBodyJson TestResult("get value") expectCode 200
+    }
 
     @Test
     fun `returns successful status codes`() {
