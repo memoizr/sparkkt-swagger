@@ -21,10 +21,12 @@ fun Any.toHashMap() = gson.fromJson(json, Map::class.java)
 inline fun <reified T : Any> String.parseJson() :T  = gson.fromJson(this, T::class.java)
 
 fun GsonBuilder.registerSealedClassAdapter() = registerTypeHierarchyAdapter(Sealed::class.java, JsonDeserializer<Sealed> { json, typeOfT, context ->
-   val clazz = typeOfT as Class<*>
-   val nestedClasses = clazz.kotlin.nestedClasses
-   val subclasses = nestedClasses.filter { it.isFinal && it.isSubclassOf(clazz.kotlin) }
-   val type = json.asJsonObject.get(Sealed::type.name).asString
-   val subtype = subclasses.find { it.simpleName == type }
+   val clazz = (typeOfT as Class<*>).kotlin
+   val subtype = if (clazz.isFinal) clazz else {
+       val nestedClasses = clazz.nestedClasses
+       val subclasses = nestedClasses.filter { it.isFinal && it.isSubclassOf(clazz) }
+       val type = json.asJsonObject.get(Sealed::type.name).asString
+       subclasses.find { it.simpleName == type }
+   }
    Gson().fromJson<Sealed>(json, subtype!!.java)
 })
