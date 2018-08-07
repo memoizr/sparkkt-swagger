@@ -46,35 +46,42 @@ private fun objectSchema(klass: KClass<*>): Schemas.ObjectSchema {
                                         else -> null
                                     }
                                     pattern = desc?.pattern
+                                    visibility = desc?.visibility
                                 }
                                 is Schemas.StringSchema -> schema.apply {
                                     description = desc?.description
                                     example = desc?.exString?.nullIfEmpty()
                                     pattern = desc?.pattern
+                                    visibility = desc?.visibility
                                 }
                                 is Schemas.FloatSchema -> schema.apply {
                                     description = desc?.description
                                     example = desc?.exFloat?.nullIfZero()
                                     pattern = desc?.pattern
+                                    visibility = desc?.visibility
                                 }
                                 is Schemas.DoubleSchema -> schema.apply {
                                     description = desc?.description
                                     example = desc?.exDouble?.nullIfZero()
                                     pattern = desc?.pattern
+                                    visibility = desc?.visibility
                                 }
                                 is Schemas.IntSchema -> schema.apply {
                                     description = desc?.description
                                     example = desc?.exInt?.nullIfZero()
                                     pattern = desc?.pattern
+                                    visibility = desc?.visibility
                                 }
                                 is Schemas.LongSchema -> schema.apply {
                                     description = desc?.description
                                     example = desc?.exLong?.nullIfZero()
                                     pattern = desc?.pattern
+                                    visibility = desc?.visibility
                                 }
                                 is Schemas.BaseSchema<*> -> schema.apply {
                                     description = desc?.description
                                     pattern = desc?.pattern
+                                    visibility = desc?.visibility
                                 }
                                 else -> schema
                             }

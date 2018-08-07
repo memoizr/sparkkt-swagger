@@ -5,7 +5,7 @@ import com.emoticast.sparktswagger.extensions.print
 import org.junit.Rule
 import org.junit.Test
 
-class ValidationsTest: SparkTest() {
+class ValidationsTest : SparkTest() {
 
     val id = path("id", "the id", NonNegativeInt)
     val offset = optionalQuery("offset", "offset", condition = NonNegativeInt, default = 20, emptyAsMissing = true)
@@ -40,4 +40,3 @@ class ValidationsTest: SparkTest() {
         whenPerform GET "/$root/foo/11?stringset=foo,bar"  expectBody """"ok""""
     }
 }
-

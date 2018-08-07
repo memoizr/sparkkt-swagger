@@ -1,6 +1,8 @@
 package com.emoticast.sparktswagger
 
 import com.emoticast.sparktswagger.documentation.Description
+import com.emoticast.sparktswagger.documentation.Visibility
+import com.emoticast.sparktswagger.documentation.Visibility.INTERNAL
 import java.util.*
 
 val root = "home"
@@ -26,7 +28,8 @@ private val length = optionalQuery(
         name = "length",
         description = "The number of items returned in the page",
         default = 20,
-        condition = NonNegativeInt)
+        condition = NonNegativeInt,
+        visibility = INTERNAL)
 
 private val offset = optionalQuery(
         name = "offset",
@@ -68,8 +71,10 @@ val ServerRouter: Router.() -> Unit = {
 
 //    http GET "json" isHandledBy { Response("Hello world").ok }
 
-    "List all clips" GET
-            v1 / clips / clipId with queries(random, query, length, offset, query) isHandledBy getPathGreeting
+    GET(v1 / clips / clipId) with
+            Visibility.INTERNAL with
+            queries(random, query, length, offset, query) isHandledBy
+            getPathGreeting
 
         "Run a cute test" POST
                 v1 / clips / clipId with queries(random,query, length, offset) with body<TestClass>() with headers(name) isHandledBy getGreetingBody
@@ -113,6 +118,7 @@ data class TestClass(
         @Description("A great list", exEmptyList = true)
         val aListBoolean: List<Boolean>,
         val anObjectList: List<SimpleObject>,
+        @Description(visibility = INTERNAL)
         val theEnum: ClassicEnum,
         val aSeal: MySeal,
         val moreSeals: List<MySeal>

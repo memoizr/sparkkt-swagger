@@ -1,5 +1,6 @@
 package com.emoticast.sparktswagger
 
+import com.emoticast.sparktswagger.documentation.Visibility
 import spark.Request
 
 data class OpDescription(val description: String)
@@ -12,7 +13,8 @@ data class Endpoint<B : Any>(
         val pathParams: Set<PathParam<out Any>>,
         val queryParams: Set<QueryParameter<*>>,
         val headerParams: Set<HeaderParameter<*>>,
-        val body: Body<B>) {
+        val body: Body<B>,
+        val visibility: Visibility = Visibility.PUBLIC) {
 
     infix fun withQuery(queryParameter: QueryParameter<*>) = copy(queryParams = queryParams + queryParameter)
     infix fun withHeader(params: HeaderParameter<*>) = copy(headerParams = headerParams + params)
@@ -34,6 +36,8 @@ data class Endpoint<B : Any>(
 
     infix fun inSummary(summary: String) = copy(summary = summary)
     infix fun isDescribedAs(description: String) = copy(description = description)
+
+    infix fun with(visibility: Visibility) = copy(visibility = visibility)
 
     infix fun with(queryParameter: List<Parameter<*>>) = let {
         queryParameter.foldRight(this) { param, endpoint ->

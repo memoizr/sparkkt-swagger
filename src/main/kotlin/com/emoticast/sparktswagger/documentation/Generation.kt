@@ -8,18 +8,20 @@ import java.io.FileOutputStream
 import kotlin.reflect.full.starProjectedType
 
 fun Router.generateDocs(): Spec {
-    val openApi = OpenApi(info = Info(config.title, "1"), servers = listOf(Server(config.host)))
+    val openApi = OpenApi(info = Info(config.title, "1.0"), servers = listOf(Server(config.host)))
     return endpoints
             .groupBy { it.endpoint.url }
-            .map {
-                it.key to it.value.foldRight(Path()) { bundle: Router.EndpointBundle<*>, path ->
+            .map { entry ->
+                entry.key to entry.value.foldRight(Path()) { bundle: Router.EndpointBundle<*>, path ->
                     path.withOperation(
                             bundle.endpoint.httpMethod,
                             Operation(
                                     tags = bundle.endpoint.url.split("/").drop(2).firstOrNull()?.let { listOf(it) },
                                     summary = bundle.endpoint.summary,
                                     description = bundle.endpoint.description,
-                                    responses = emptyMap())
+                                    responses = emptyMap(),
+                                    visibility = bundle.endpoint.visibility
+                            )
                                     .withResponse(ContentType.APPLICATION_JSON, bundle.response, "200")
                                     .let {
                                         if (bundle.endpoint.body.klass != Nothing::class) {
@@ -32,7 +34,9 @@ fun Router.generateDocs(): Spec {
                                                     name = p.name,
                                                     required = p.required,
                                                     description = getDescription(p),
-                                                    schema = toSchema(p.type.kotlin.starProjectedType).withPattern(p.pattern.regex)
+                                                    schema = toSchema(p.type.kotlin.starProjectedType)
+                                                            .withPattern(p.pattern.regex)
+                                                            .withVisibility(p.visibility)
 
                                             ))
                                         }
@@ -42,7 +46,8 @@ fun Router.generateDocs(): Spec {
                                             acc.withParameter(Parameters.PathParameter(
                                                     name = param.name,
                                                     description = getDescription(param),
-                                                    schema = toSchema(param.type.kotlin.starProjectedType).withPattern(param.pattern.regex)
+                                                    schema = toSchema(param.type.kotlin.starProjectedType)
+                                                            .withPattern(param.pattern.regex)
                                             ))
                                         }
                                     }
@@ -53,7 +58,9 @@ fun Router.generateDocs(): Spec {
                                                     description = getDescription(p),
                                                     allowEmptyValue = p.emptyAsMissing,
                                                     required = p.required,
-                                                    schema = toSchema(p.type.kotlin.starProjectedType).withPattern(p.pattern.regex)
+                                                    schema = toSchema(p.type.kotlin.starProjectedType)
+                                                            .withPattern(p.pattern.regex)
+                                                            .withVisibility(p.visibility)
 
                                             ))
                                         }
@@ -61,7 +68,7 @@ fun Router.generateDocs(): Spec {
                     )
                 }
             }.fold(openApi) { a, b -> a.withPath(b.first, b.second) }
-            .let {  Spec(it.json, this) }
+            .let { Spec(it.json, this) }
 }
 
 data class Spec(val spec: String, val router: Router) {

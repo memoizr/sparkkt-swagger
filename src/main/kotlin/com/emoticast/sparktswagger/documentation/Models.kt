@@ -36,11 +36,19 @@ internal sealed class Schemas {
         }
     }
 
+    fun withVisibility(visibility: Visibility?): Schemas {
+        return when (this) {
+            is BaseSchema<*> -> this.apply { this.visibility = visibility }
+            else -> this
+        }
+    }
+
     internal abstract class BaseSchema<T : Any>(
             open val type: DataType,
             open val format: Format? = null,
             var pattern: String? = null,
-            var nullable: Boolean? = null
+            var nullable: Boolean? = null,
+            var visibility: Visibility? = Visibility.PUBLIC
     ) : Schemas() {
         abstract var description: String?
     }
@@ -202,7 +210,8 @@ internal sealed class Parameters {
             val schema: Schemas,
             val description: String? = null,
             val deprecated: Boolean? = false,
-            val allowEmptyValue: Boolean? = false
+            val allowEmptyValue: Boolean? = false,
+            val visibility: Visibility? = Visibility.PUBLIC
     ) : Parameter() {
         val `in`: ParameterType = ParameterType.query
     }
@@ -212,7 +221,8 @@ internal sealed class Parameters {
             val required: Boolean,
             val schema: Schemas,
             val description: String? = null,
-            val deprecated: Boolean? = false
+            val deprecated: Boolean? = false,
+            val visibility: Visibility? = Visibility.PUBLIC
     ) : Parameter() {
         val `in`: ParameterType = ParameterType.header
     }
@@ -285,9 +295,9 @@ internal data class Operation(
         val requestBody: RequestBodies? = null,
         val deprecated: Boolean? = null,
         val security: Map<String, List<String>>? = null,
-        val servers: List<Server>? = null
+        val servers: List<Server>? = null,
+        val visibility: Visibility?
 )
-
 
 internal data class Contact(val name: String? = null, val url: String? = null, val email: String? = null)
 internal data class License(val name: String, val url: String? = null)
@@ -346,5 +356,10 @@ annotation class Description(val description: String = "",
                              val exFloat: Float = 0.0f,
                              val exDouble: Double = 0.0,
                              val exEmptyList: Boolean = false,
-                             val pattern: String = "")
+                             val pattern: String = "",
+                             val visibility: Visibility = Visibility.PUBLIC)
 
+
+enum class Visibility {
+    PUBLIC, INTERNAL
+}

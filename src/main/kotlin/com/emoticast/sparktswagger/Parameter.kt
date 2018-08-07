@@ -1,5 +1,7 @@
 package com.emoticast.sparktswagger
 
+import com.emoticast.sparktswagger.documentation.Visibility
+
 sealed class Parameter<T>(
         open val type: Class<*>,
         open val name: String,
@@ -17,7 +19,8 @@ sealed class HeaderParameter<T>(
         override val description: String,
         override val required: Boolean = false,
         override val emptyAsMissing: Boolean = false,
-        override val invalidAsMissing: Boolean = false
+        override val invalidAsMissing: Boolean = false,
+        open val visibility: Visibility = Visibility.PUBLIC
 ) : Parameter<T>(type, name, pattern, description, required, emptyAsMissing)
 
 sealed class QueryParameter<T>(
@@ -27,7 +30,8 @@ sealed class QueryParameter<T>(
         override val description: String,
         override val required: Boolean = false,
         override val emptyAsMissing: Boolean = false,
-        override val invalidAsMissing: Boolean = false
+        override val invalidAsMissing: Boolean = false,
+        open val visibility: Visibility = Visibility.PUBLIC
 ) : Parameter<T>(type, name, pattern, description, required, emptyAsMissing)
 
 data class PathParam<T>(
@@ -45,7 +49,8 @@ data class HeaderParam<T>(
         override val pattern: Validator<T>,
         override val description: String,
         override val emptyAsMissing: Boolean,
-        override val invalidAsMissing: Boolean) : HeaderParameter<T>(type, name, pattern, description, true, emptyAsMissing, invalidAsMissing)
+        override val invalidAsMissing: Boolean,
+        override val visibility: Visibility) : HeaderParameter<T>(type, name, pattern, description, true, emptyAsMissing, invalidAsMissing)
 
 data class OptionalHeaderParam<T>(
         override val type: Class<*>,
@@ -54,7 +59,8 @@ data class OptionalHeaderParam<T>(
         override val description: String,
         val default: T,
         override val emptyAsMissing: Boolean,
-        override val invalidAsMissing: Boolean) : HeaderParameter<T>(type, name, pattern, description, false, emptyAsMissing, invalidAsMissing)
+        override val invalidAsMissing: Boolean,
+        override val visibility: Visibility) : HeaderParameter<T>(type, name, pattern, description, false, emptyAsMissing, invalidAsMissing)
 
 data class OptionalQueryParam<T>(
         override val type: Class<*>,
@@ -63,7 +69,8 @@ data class OptionalQueryParam<T>(
         override val description: String,
         val default: T,
         override val emptyAsMissing: Boolean,
-        override val invalidAsMissing: Boolean) : QueryParameter<T>(type, name, pattern, description, false, emptyAsMissing, invalidAsMissing)
+        override val invalidAsMissing: Boolean,
+        override val visibility: Visibility) : QueryParameter<T>(type, name, pattern, description, false, emptyAsMissing, invalidAsMissing)
 
 data class QueryParam<T>(
         override val type: Class<*>,
@@ -71,14 +78,16 @@ data class QueryParam<T>(
         override val pattern: Validator<T>,
         override val description: String,
         override val emptyAsMissing: Boolean,
-        override val invalidAsMissing: Boolean
+        override val invalidAsMissing: Boolean,
+        override val visibility: Visibility
 ) : QueryParameter<T>(type, name, pattern, description, true, emptyAsMissing, invalidAsMissing)
 
 inline fun <reified T> optionalQuery(name: String,
                                      description: String,
                                      condition: Validator<T>,
                                      emptyAsMissing: Boolean = false,
-                                     invalidAsMissing: Boolean = false) =
+                                     invalidAsMissing: Boolean = false,
+                                     visibility: Visibility = Visibility.PUBLIC) =
         OptionalQueryParam(
                 T::class.java,
                 name,
@@ -86,7 +95,8 @@ inline fun <reified T> optionalQuery(name: String,
                 description,
                 default = null,
                 emptyAsMissing = emptyAsMissing,
-                invalidAsMissing = invalidAsMissing
+                invalidAsMissing = invalidAsMissing,
+                visibility = visibility
         )
 
 inline fun <reified T> optionalQuery(name: String,
@@ -94,7 +104,8 @@ inline fun <reified T> optionalQuery(name: String,
                                      condition: Validator<T>,
                                      default: T,
                                      emptyAsMissing: Boolean = false,
-                                     invalidAsMissing: Boolean = false) =
+                                     invalidAsMissing: Boolean = false,
+                                     visibility: Visibility = Visibility.PUBLIC) =
         OptionalQueryParam(
                 T::class.java,
                 name,
@@ -102,21 +113,24 @@ inline fun <reified T> optionalQuery(name: String,
                 description,
                 default = default,
                 emptyAsMissing = emptyAsMissing,
-                invalidAsMissing = invalidAsMissing
+                invalidAsMissing = invalidAsMissing,
+                visibility = visibility
         )
 
 inline fun <reified T> query(name: String,
                              description: String,
                              condition: Validator<T>,
                              emptyAsMissing: Boolean = false,
-                             invalidAsMissing: Boolean = false) =
+                             invalidAsMissing: Boolean = false,
+                             visibility: Visibility = Visibility.PUBLIC) =
         QueryParam(
                 T::class.java,
                 name,
                 condition,
                 description,
                 emptyAsMissing = emptyAsMissing,
-                invalidAsMissing = invalidAsMissing
+                invalidAsMissing = invalidAsMissing,
+                visibility = visibility
         )
 
 inline fun <reified T> optionalHeader(
@@ -124,7 +138,8 @@ inline fun <reified T> optionalHeader(
         description: String,
         condition: Validator<T>,
         emptyAsMissing: Boolean = false,
-        invalidAsMissing: Boolean = false) =
+        invalidAsMissing: Boolean = false,
+        visibility: Visibility = Visibility.PUBLIC) =
         OptionalHeaderParam(
                 T::class.java,
                 name,
@@ -132,7 +147,8 @@ inline fun <reified T> optionalHeader(
                 description,
                 default = null,
                 emptyAsMissing = emptyAsMissing,
-                invalidAsMissing = invalidAsMissing
+                invalidAsMissing = invalidAsMissing,
+                visibility = visibility
         )
 
 inline fun <reified T> optionalHeader(
@@ -141,7 +157,8 @@ inline fun <reified T> optionalHeader(
         condition: Validator<T>,
         emptyAsMissing: Boolean = false,
         default: T,
-        invalidAsMissing: Boolean = false) =
+        invalidAsMissing: Boolean = false,
+        visibility: Visibility = Visibility.PUBLIC) =
         OptionalHeaderParam(
                 T::class.java,
                 name,
@@ -149,7 +166,8 @@ inline fun <reified T> optionalHeader(
                 description,
                 default = default,
                 emptyAsMissing = emptyAsMissing,
-                invalidAsMissing = invalidAsMissing
+                invalidAsMissing = invalidAsMissing,
+                visibility = visibility
         )
 
 inline fun <reified T> header(
@@ -157,14 +175,16 @@ inline fun <reified T> header(
         description: String,
         condition: Validator<T>,
         emptyAsMissing: Boolean = false,
-        invalidAsMissing: Boolean = false
+        invalidAsMissing: Boolean = false,
+        visibility: Visibility = Visibility.PUBLIC
 ) = HeaderParam(
         T::class.java,
         name,
         condition,
         description,
         emptyAsMissing = emptyAsMissing,
-        invalidAsMissing = invalidAsMissing
+        invalidAsMissing = invalidAsMissing,
+        visibility = visibility
 )
 
 inline fun <reified T> path(name: String, description: String, condition: Validator<T>) = PathParam(

@@ -1,5 +1,7 @@
 package com.emoticast.sparktswagger
 
+import com.emoticast.sparktswagger.documentation.Description
+import com.emoticast.sparktswagger.documentation.Visibility
 import com.emoticast.sparktswagger.extensions.json
 import org.junit.Rule
 import org.junit.Test
@@ -99,4 +101,4 @@ class SimplePathBuilderTest : SparkTest() {
     }
 }
 
-data class TestResult(val value: String)
+data class TestResult(@Description(visibility = Visibility.INTERNAL) val value: String)

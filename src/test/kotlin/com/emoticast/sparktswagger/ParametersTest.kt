@@ -1,6 +1,7 @@
 package com.emoticast.sparktswagger
 
 import com.emoticast.sparktswagger.HttpResponse.ErrorHttpResponse
+import com.emoticast.sparktswagger.documentation.Visibility
 import com.emoticast.sparktswagger.extensions.json
 import org.junit.Rule
 import org.junit.Test
@@ -29,7 +30,7 @@ val intHead = header(name = "int", description = "description", condition = NonN
 val offsetHead = optionalHeader(name = "offsetHead", description = "description", condition = NonNegativeInt, default = 666, emptyAsMissing = true)
 val limitHead = optionalHeader(name = "limitHead", description = "description", condition = NonNegativeInt, emptyAsMissing = true)
 val queryParam = optionalQuery(name = "param", description = "parameter", condition = NonEmptyString, default = "hey")
-val headerParam = optionalHeader(name = "param", description = "parameter", condition = NonEmptyString, default = "hey")
+val headerParam = optionalHeader(name = "param", description = "parameter", condition = NonEmptyString, default = "hey", visibility = Visibility.INTERNAL)
 val pathParam = path(name = "param", description = "parameter", condition = NonEmptyString)
 
 val time = query("time", description = "the time", condition = DateValidator)
