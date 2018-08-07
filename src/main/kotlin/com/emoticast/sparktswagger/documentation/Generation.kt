@@ -34,9 +34,9 @@ fun Router.generateDocs(): Spec {
                                                     name = p.name,
                                                     required = p.required,
                                                     description = getDescription(p),
+                                                    visibility = p.visibility,
                                                     schema = toSchema(p.type.kotlin.starProjectedType)
                                                             .withPattern(p.pattern.regex)
-                                                            .withVisibility(p.visibility)
 
                                             ))
                                         }
@@ -58,9 +58,9 @@ fun Router.generateDocs(): Spec {
                                                     description = getDescription(p),
                                                     allowEmptyValue = p.emptyAsMissing,
                                                     required = p.required,
+                                                    visibility = p.visibility,
                                                     schema = toSchema(p.type.kotlin.starProjectedType)
                                                             .withPattern(p.pattern.regex)
-                                                            .withVisibility(p.visibility)
 
                                             ))
                                         }

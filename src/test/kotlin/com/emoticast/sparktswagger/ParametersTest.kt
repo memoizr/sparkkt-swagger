@@ -52,9 +52,6 @@ class ParametersTest : SparkTest() {
             IntTestResult(request[intparam]).ok
         }
 
-
-        GET("queriespath") inSummary "does a foo" withQuery q withHeader intHead isHandledBy { TestResult(request[q]).ok }
-
         val query = query("q", "the query", NonEmptyString)
 
         "" GET "queriespath" inSummary "does a foo" withQuery query isHandledBy { TestResult(request[query]).ok }

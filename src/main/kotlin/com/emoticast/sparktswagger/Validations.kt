@@ -20,7 +20,7 @@ object NonEmptyStringSet : Validator<Set<String>> {
 
 object StringSet : Validator<Set<String>> {
     override val description = "string set"
-    override val regex = """^\.*$""".toRegex()
+    override val regex = """.*""".toRegex()
     override val parse: (String) -> Set<String> = { it.split(",").toSet() }
 }
 
