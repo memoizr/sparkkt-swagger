@@ -1,7 +1,9 @@
 package com.emoticast.sparktswagger
 
-import com.emoticast.sparktswagger.extensions.gson
-import com.google.gson.Gson
+//import com.emoticast.sparktswagger.extensions.gson
+import com.beust.klaxon.Klaxon
+import com.emoticast.sparktswagger.extensions.klaxon
+import com.emoticast.sparktswagger.extensions.parse
 import spark.Request
 import spark.Response
 import kotlin.reflect.KClass
@@ -11,7 +13,7 @@ data class RequestHandler<T : Any>(
         val params: Set<Parameter<*>>,
         val request: Request,
         val response: Response) {
-    val body: T by lazy { _body?.customGson?.fromJson(request.body()!!, _body.klass.java)!! }
+    val body: T by lazy { _body?.customGson?.parse(request.body()!!, _body.klass)!! }
 
 
     inline operator fun <reified T : Any> Request.get(param: PathParam<T>): T =
@@ -47,7 +49,7 @@ data class RequestHandler<T : Any>(
 fun queries(vararg queryParameter: QueryParameter<*>) = queryParameter.asList()
 fun headers(vararg headerParameter: HeaderParameter<*>) = headerParameter.asList()
 fun description(description: String) = OpDescription(description)
-inline fun <reified T : Any> body(customGson: Gson = gson) = Body(T::class, customGson)
+inline fun <reified T : Any> body(customGson: Klaxon = klaxon) = Body(T::class, customGson)
 
 fun String?.filterValid(param: Parameter<*>) = when {
     this == null -> null
@@ -56,7 +58,7 @@ fun String?.filterValid(param: Parameter<*>) = when {
     else -> this
 }
 
-data class Body<T : Any>(val klass: KClass<T>, val customGson: Gson = gson)
+data class Body<T : Any>(val klass: KClass<T>, val customGson: Klaxon = klaxon)
 
 data class UnregisteredParamException(val param: Parameter<*>) : Throwable()
 

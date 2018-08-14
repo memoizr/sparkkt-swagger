@@ -89,20 +89,20 @@ class ParametersTest : SparkTest() {
 
     @Test
     fun `validates path parameters`() {
-        whenPerform GET "/$root/intpath2/4545/end" expectBody IntTestResult(4545).json
-        whenPerform GET "/$root/intpath2/hello/end" expectBody ErrorHttpResponse<TestResult>(400, listOf("Path parameter `intParam` is invalid, expecting non negative integer, got `hello`")).json
+        whenPerform GET "/$root/intpath2/4545/end" expectBodyJson IntTestResult(4545)
+        whenPerform GET "/$root/intpath2/hello/end" expectBodyJson ErrorHttpResponse<TestResult>(400, listOf("Path parameter `intParam` is invalid, expecting non negative integer, got `hello`"))
     }
 
     @Test
     fun `supports query parameters`() {
-        whenPerform GET "/$root/queriespath?q=foo" expectBody TestResult("foo").json
-        whenPerform GET "/$root/queriespath?q=" expectBody ErrorHttpResponse<TestResult>(400, listOf("Query parameter `q` is invalid, expecting non empty string, got ``")).json
-        whenPerform GET "/$root/queriespath" expectBody ErrorHttpResponse<TestResult>(400, listOf("Required Query parameter `q` is missing")).json
+        whenPerform GET "/$root/queriespath?q=foo" expectBodyJson TestResult("foo")
+        whenPerform GET "/$root/queriespath?q=" expectBodyJson ErrorHttpResponse<TestResult>(400, listOf("Query parameter `q` is invalid, expecting non empty string, got ``"))
+        whenPerform GET "/$root/queriespath" expectBodyJson ErrorHttpResponse<TestResult>(400, listOf("Required Query parameter `q` is missing"))
 
-        whenPerform GET "/$root/queriespath2?int=3434" expectBody IntTestResult(3434).json
-        whenPerform GET "/$root/queriespath2?int=" expectBody ErrorHttpResponse<TestResult>(400, listOf("Required Query parameter `int` is missing")).json
-        whenPerform GET "/$root/queriespath2?int=hello" expectBody ErrorHttpResponse<TestResult>(400, listOf("Query parameter `int` is invalid, expecting non negative integer, got `hello`")).json
-        whenPerform GET "/$root/queriespath2?int=-34" expectBody ErrorHttpResponse<TestResult>(400, listOf("Query parameter `int` is invalid, expecting non negative integer, got `-34`")).json
+        whenPerform GET "/$root/queriespath2?int=3434" expectBodyJson IntTestResult(3434)
+        whenPerform GET "/$root/queriespath2?int=" expectBodyJson ErrorHttpResponse<TestResult>(400, listOf("Required Query parameter `int` is missing"))
+        whenPerform GET "/$root/queriespath2?int=hello" expectBodyJson ErrorHttpResponse<TestResult>(400, listOf("Query parameter `int` is invalid, expecting non negative integer, got `hello`"))
+        whenPerform GET "/$root/queriespath2?int=-34" expectBodyJson ErrorHttpResponse<TestResult>(400, listOf("Query parameter `int` is invalid, expecting non negative integer, got `-34`"))
     }
 
     @Test
@@ -116,14 +116,14 @@ class ParametersTest : SparkTest() {
 
     @Test
     fun `supports header parameters`() {
-        whenPerform GET "/$root/headerspath" withHeaders mapOf(qHead.name to "foo") expectBody TestResult("foo").json
-        whenPerform GET "/$root/headerspath" withHeaders mapOf(qHead.name to "") expectBody ErrorHttpResponse<TestResult>(400, listOf("Header parameter `q` is invalid, expecting non empty string, got ``")).json
-        whenPerform GET "/$root/headerspath" withHeaders mapOf() expectBody ErrorHttpResponse<TestResult>(400, listOf("Required Header parameter `q` is missing")).json
+        whenPerform GET "/$root/headerspath" withHeaders mapOf(qHead.name to "foo") expectBodyJson TestResult("foo")
+        whenPerform GET "/$root/headerspath" withHeaders mapOf(qHead.name to "") expectBodyJson ErrorHttpResponse<TestResult>(400, listOf("Header parameter `q` is invalid, expecting non empty string, got ``"))
+        whenPerform GET "/$root/headerspath" withHeaders mapOf() expectBodyJson ErrorHttpResponse<TestResult>(400, listOf("Required Header parameter `q` is missing"))
 
-        whenPerform GET "/$root/headerspath2" withHeaders mapOf(intHead.name to 3434) expectBody IntTestResult(3434).json
-        whenPerform GET "/$root/headerspath2" expectBody ErrorHttpResponse<TestResult>(400, listOf("Required Header parameter `int` is missing")).json
-        whenPerform GET "/$root/headerspath2" withHeaders mapOf(intHead.name to "hello") expectBody ErrorHttpResponse<TestResult>(400, listOf("Header parameter `int` is invalid, expecting non negative integer, got `hello`")).json
-        whenPerform GET "/$root/headerspath2" withHeaders mapOf(intHead.name to -34) expectBody ErrorHttpResponse<TestResult>(400, listOf("Header parameter `int` is invalid, expecting non negative integer, got `-34`")).json
+        whenPerform GET "/$root/headerspath2" withHeaders mapOf(intHead.name to 3434) expectBodyJson IntTestResult(3434)
+        whenPerform GET "/$root/headerspath2" expectBodyJson ErrorHttpResponse<TestResult>(400, listOf("Required Header parameter `int` is missing"))
+        whenPerform GET "/$root/headerspath2" withHeaders mapOf(intHead.name to "hello") expectBodyJson ErrorHttpResponse<TestResult>(400, listOf("Header parameter `int` is invalid, expecting non negative integer, got `hello`"))
+        whenPerform GET "/$root/headerspath2" withHeaders mapOf(intHead.name to -34) expectBodyJson ErrorHttpResponse<TestResult>(400, listOf("Header parameter `int` is invalid, expecting non negative integer, got `-34`"))
     }
 
     @Test
@@ -141,7 +141,7 @@ class ParametersTest : SparkTest() {
 
     @Test
     fun `supports body parameter`() {
-        whenPerform POST "/$root/bodyparam" withBody bodyParam expectBody BodyTestResult(42, 33).json
+        whenPerform POST "/$root/bodyparam" withBody bodyParam expectBodyJson BodyTestResult(42, 33)
     }
 
     @Test
