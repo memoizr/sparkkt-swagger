@@ -86,7 +86,6 @@ class Router(val config: Config, val service: Service) {
         val router = Router(config, service)
         router.block()
         endpoints += router.endpoints.map { EndpointBundle(it.endpoint.copy(url = this.leadingSlash + it.endpoint.url), it.response, it.function) }
-//        endpoints += router.endpoints
     }
 
     operator fun ParametrizedPath.div(block: Router.() -> Unit) {
@@ -95,6 +94,8 @@ class Router(val config: Config, val service: Service) {
         router.endpoints += router.endpoints.map { EndpointBundle(it.endpoint.copy(url = this.path.leadingSlash + it.endpoint.url, pathParams = it.endpoint.pathParams + this.pathParameters), it.response, it.function) }
         endpoints += router.endpoints
     }
+
+    operator fun PathParam<out Any>.div(block: Router.() -> Unit) = "" / this / block
 
     inline infix fun <B : Any, reified T : Any> Endpoint<B>.isHandledBy(noinline block: RequestHandler<B>.() -> HttpResponse<T>): Endpoint<B> {
         endpoints += EndpointBundle(this, T::class) { request, response ->

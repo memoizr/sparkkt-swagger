@@ -44,8 +44,10 @@ class SimplePathBuilderTest : SparkTest() {
             "foo" GET "/a" isHandledBy { TestResult("get value").ok }
         }
 
-        "hey" / clipId / {
-            "foo" GET "/a" isHandledBy { TestResult("get value").ok }
+        "hey" / {
+            clipId / {
+                "foo" GET "/a" isHandledBy { TestResult("get value").ok }
+            }
         }
 
         "v1" / {

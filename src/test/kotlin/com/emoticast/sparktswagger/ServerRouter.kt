@@ -9,7 +9,7 @@ val root = "home"
 val v1 = "/v1"
 val clips = "clips"
 
-val clipId = path(
+val clipId: PathParam<Int> = path(
         name = "clipId",
         condition = NonNegativeInt,
         description = "The clip id")

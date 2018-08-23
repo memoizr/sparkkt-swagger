@@ -25,7 +25,7 @@ val rule = SparkTestRule(port) {
 }
 
 @Test
-fun `sets visibility for routes routes`() {
+fun `sets visibility for routes`() {
 //    expect that ((router.generateDocs().spec.print().parseJson<Json>()["paths"]
 //            ?.get("/optionally/private")
 //            ?.get("get")
