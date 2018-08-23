@@ -92,13 +92,13 @@ class Router(val config: Config, val service: Service) {
         val router = Router(config, service)
         router.block()
         router.endpoints += router.endpoints.map { EndpointBundle(it.endpoint.copy(url = this.path.leadingSlash + it.endpoint.url, pathParams = it.endpoint.pathParams + this.pathParameters), it.response, it.function) }
-//        endpoints += router.endpoints
+        endpoints += router.endpoints
     }
 
     operator fun PathParam<out Any>.div(block: Router.() -> Unit)  {
         val router = Router(config, service)
         router.block()
-        val path = ParametrizedPath("/{${path}}", setOf(this))
+        val path = ParametrizedPath("/{$name}", setOf(this))
         endpoints += router.endpoints.map { EndpointBundle(it.endpoint.copy(url = path.path.leadingSlash + it.endpoint.url), it.response, it.function) }
     }
 
