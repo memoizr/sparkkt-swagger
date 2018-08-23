@@ -95,7 +95,12 @@ class Router(val config: Config, val service: Service) {
         endpoints += router.endpoints
     }
 
-    operator fun PathParam<out Any>.div(block: Router.() -> Unit) = "" / this / block
+    operator fun PathParam<out Any>.div(block: Router.() -> Unit)  {
+        val router = Router(config, service)
+        router.block()
+        val path = ParametrizedPath("/{${path}}", setOf(this))
+        endpoints += router.endpoints.map { EndpointBundle(it.endpoint.copy(url = path.path.leadingSlash + it.endpoint.url), it.response, it.function) }
+    }
 
     inline infix fun <B : Any, reified T : Any> Endpoint<B>.isHandledBy(noinline block: RequestHandler<B>.() -> HttpResponse<T>): Endpoint<B> {
         endpoints += EndpointBundle(this, T::class) { request, response ->

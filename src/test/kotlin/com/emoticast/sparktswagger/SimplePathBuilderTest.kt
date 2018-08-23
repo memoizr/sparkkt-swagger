@@ -65,6 +65,8 @@ class SimplePathBuilderTest : SparkTest() {
         whenPerform GET "/$root/one/b" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/one/two/c" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/hey/there/a" expectBodyJson TestResult("get value") expectCode 200
+
+        whenPerform GET "/$root/hey/a" expectCode 404
         whenPerform GET "/$root/hey/123/a" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/v1/123" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/v1/one/123" expectBodyJson TestResult("get value") expectCode 200
