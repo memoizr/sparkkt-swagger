@@ -14,6 +14,11 @@ val clipId: PathParam<Int> = path(
         condition = NonNegativeInt,
         description = "The clip id")
 
+val otherPathParam: PathParam<Int> = path(
+        name = "otherPathParam",
+        condition = NonNegativeInt,
+        description = "The clip id")
+
 val name = header(name = "clips",
         condition = NonEmptyString,
         description = "The clip id")

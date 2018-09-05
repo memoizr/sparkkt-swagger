@@ -2,6 +2,7 @@ package com.emoticast.sparktswagger
 
 import com.emoticast.sparktswagger.documentation.ContentType
 import com.emoticast.sparktswagger.extensions.json
+import com.emoticast.sparktswagger.extensions.print
 import com.google.gson.Gson
 import spark.Request
 import spark.Response
@@ -134,6 +135,7 @@ class Router(val config: Config, val service: Service) {
 
 data class ParametrizedPath(val path: String, val pathParameters: Set<PathParam<out Any>>) {
     operator fun div(path: String) = copy(path = this.path + "/" + path)
+    operator fun div(path: PathParam<out Any>) = copy(path = this.path + "/" + "{${path.name}}", pathParameters = pathParameters+path).print()
 }
 
 val String.leadingSlash get() = if (!startsWith("/")) "/" + this else this

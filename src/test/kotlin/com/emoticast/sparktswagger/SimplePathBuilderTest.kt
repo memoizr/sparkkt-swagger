@@ -55,6 +55,20 @@ class SimplePathBuilderTest : SparkTest() {
             http GET clipId isHandledBy { TestResult("get value").ok }
             "foo" GET "one" / clipId isHandledBy { TestResult("get value").ok }
         }
+
+        GET("params1" / clipId / "params2" / otherPathParam) isHandledBy { TestResult("${request[clipId]}${request[otherPathParam]}").ok }
+
+//        "params3" / {
+//            clipId / {
+//                "params4" / {
+//                    otherPathParam / {
+//                        GET() isHandledBy { TestResult("${request[clipId]}${request[otherPathParam]}").ok }
+//                    }
+//                }
+//            }
+//        }
+
+
         GET() isHandledBy { TestResult("get value").ok }
     }
 
@@ -70,8 +84,8 @@ class SimplePathBuilderTest : SparkTest() {
         whenPerform GET "/$root/hey/123/a" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/v1/123" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/v1/one/123" expectBodyJson TestResult("get value") expectCode 200
-        whenPerform GET "/$root/v1" expectBody  TestResult("get value").json expectCode 200
-        whenPerform GET "/$root" expectBody  TestResult("get value").json expectCode 200
+        whenPerform GET "/$root/v1" expectBody TestResult("get value").json expectCode 200
+        whenPerform GET "/$root" expectBody TestResult("get value").json expectCode 200
     }
 
     @Test
@@ -102,6 +116,12 @@ class SimplePathBuilderTest : SparkTest() {
         whenPerform PUT "/$root/infixslash/bar" expectBodyJson TestResult("success") expectCode 200
         whenPerform POST "/$root/infixslash/bar" expectBodyJson TestResult("success") expectCode 200
         whenPerform DELETE "/$root/infixslash/bar" expectBodyJson TestResult("success") expectCode 200
+    }
+
+    @Test
+    fun `supports several path parameters`() {
+        whenPerform GET "/$root/params1/90/params2/32" expectBodyJson TestResult("9032") expectCode 200
+//        whenPerform GET "/$root/params3/42/params4/24" expectBodyJson TestResult("4224") expectCode 200
     }
 }
 
