@@ -3,13 +3,18 @@ package com.emoticast.sparktswagger
 import ch.qos.logback.classic.Logger
 import org.slf4j.LoggerFactory
 import spark.Service
+import java.io.File
 
 class Snitch(val config: Config = Config()) {
     val http by lazy { Service.ignite().port(config.port) }
 
 
     fun setRoutes(routerConfiguration: Router.() -> Unit): Router {
-        http.externalStaticFileLocation("/tmp/swagger-ui/docs")
+        val tmpDir = File(System.getProperty("java.io.tmpdir") + "/swagger-ui/docs")
+        if (!tmpDir.exists()) {
+            tmpDir.mkdir()
+        }
+        http.externalStaticFileLocation(tmpDir.absolutePath)
         val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
         logger.level = config.logLevel
 
