@@ -12,7 +12,7 @@ class Snitch(val config: Config = Config()) {
     fun setRoutes(routerConfiguration: Router.() -> Unit): Router {
         val tmpDir = File(System.getProperty("java.io.tmpdir") + "/swagger-ui/docs")
         if (!tmpDir.exists()) {
-            tmpDir.mkdir()
+            tmpDir.mkdirs()
         }
         http.externalStaticFileLocation(tmpDir.absolutePath)
         val logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
