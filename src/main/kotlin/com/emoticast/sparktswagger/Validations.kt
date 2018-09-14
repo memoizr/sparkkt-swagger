@@ -1,4 +1,5 @@
 package com.emoticast.sparktswagger
+import kotlin.text.RegexOption.DOT_MATCHES_ALL
 
 object NonNegativeInt : Validator<Int> {
     override val description = "non negative integer"
@@ -8,6 +9,12 @@ object NonNegativeInt : Validator<Int> {
 
 object NonEmptyString : Validator<String> {
     override val description = "non empty string"
+    override val regex = """^.+$""".toRegex(DOT_MATCHES_ALL)
+    override val parse: (String) -> String = { it }
+}
+
+object NonEmptySingleLineString : Validator<String> {
+    override val description = "non empty single-line string"
     override val regex = """^.+$""".toRegex()
     override val parse: (String) -> String = { it }
 }
