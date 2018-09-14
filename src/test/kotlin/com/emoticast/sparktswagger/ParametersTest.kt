@@ -52,9 +52,7 @@ class ParametersTest : SparkTest() {
             IntTestResult(request[intparam]).ok
         }
 
-        val query = query("q", "the query", NonEmptyString)
-
-        "" GET "queriespath" inSummary "does a foo" withQuery query isHandledBy { TestResult(request[query]).ok }
+        "" GET "queriespath" inSummary "does a foo" withQuery q isHandledBy { TestResult(request[q]).ok }
 
         "" GET "queriespath2" with queries(int) isHandledBy { IntTestResult(request[int]).ok }
         "" GET "queriespath3" with queries(offset) isHandledBy { IntTestResult(request[offset]).ok }
