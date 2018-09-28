@@ -98,8 +98,8 @@ class SimplePathBuilderTest : SparkTest() {
 
     @Test
     fun `returns error responses`() {
-        whenPerform GET "/$root/error" expectBodyJson badRequest<TestResult>("Something went wrong") expectCode 400
-        whenPerform GET "/$root/forbidden" expectBodyJson badRequest<TestResult>("Forbidden", 403) expectCode 403
+        whenPerform GET "/$root/error" expectBodyJson badRequest<TestResult, String>("Something went wrong") expectCode 400
+        whenPerform GET "/$root/forbidden" expectBodyJson badRequest<TestResult, String>("Forbidden", 403) expectCode 403
     }
 
     @Test

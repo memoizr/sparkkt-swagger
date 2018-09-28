@@ -108,14 +108,14 @@ class Router(val config: Config, val service: Service) {
             val invalidParams = getInvalidParams(request)
             if (invalidParams.isNotEmpty()) {
                 response.status(400)
-                invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }.let { Gson().toJson(HttpResponse.ErrorHttpResponse<T>(400, it)) }
+                invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }.let { Gson().toJson(badRequest<T, List<String>>(it)) }
             } else try {
                 block(RequestHandler(body, (headerParams + queryParams + pathParams), request, response)).let {
                     response.status(it.code)
                     response.type(ContentType.APPLICATION_JSON.value)
                     when (it) {
                         is HttpResponse.SuccessfulHttpResponse -> it.body.json
-                        is HttpResponse.ErrorHttpResponse -> it.json
+                        is HttpResponse.ErrorHttpResponse<*,*> -> it.json
                     }
                 }
             } catch (unregisteredException: UnregisteredParamException) {
@@ -126,7 +126,7 @@ class Router(val config: Config, val service: Service) {
                     is QueryParameter -> "query"
                     is PathParam -> "path"
                 }
-                HttpResponse.ErrorHttpResponse<T>(500, listOf("Attempting to use unregistered $type parameter `${param.name}`")).json
+                HttpResponse.ErrorHttpResponse<T, String>(500, "Attempting to use unregistered $type parameter `${param.name}`").json
             }
         }
         return this
