@@ -11,7 +11,7 @@ import java.util.*
 val stringParam = path(
         name = "stringParam",
         description = "Description",
-        condition = NonEmptyString
+        condition = NonEmptySingleLineString
 )
 
 val intparam = path(
@@ -25,13 +25,13 @@ val int = query(name = "int", description = "description", condition = NonNegati
 private val offset = optionalQuery(name = "offset", description = "description", condition = NonNegativeInt, default = 30)
 val limit = optionalQuery(name = "limit", description = "description", condition = NonNegativeInt)
 
-val qHead = header(name = "q", description = "description", condition = NonEmptyString)
+val qHead = header(name = "q", description = "description", condition = NonEmptySingleLineString)
 val intHead = header(name = "int", description = "description", condition = NonNegativeInt)
 val offsetHead = optionalHeader(name = "offsetHead", description = "description", condition = NonNegativeInt, default = 666, emptyAsMissing = true)
 val limitHead = optionalHeader(name = "limitHead", description = "description", condition = NonNegativeInt, emptyAsMissing = true)
-val queryParam = optionalQuery(name = "param", description = "parameter", condition = NonEmptyString, default = "hey")
-val headerParam = optionalHeader(name = "param", description = "parameter", condition = NonEmptyString, default = "hey", visibility = Visibility.INTERNAL)
-val pathParam = path(name = "param", description = "parameter", condition = NonEmptyString)
+val queryParam = optionalQuery(name = "param", description = "parameter", condition = NonEmptySingleLineString, default = "hey")
+val headerParam = optionalHeader(name = "param", description = "parameter", condition = NonEmptySingleLineString, default = "hey", visibility = Visibility.INTERNAL)
+val pathParam = path(name = "param", description = "parameter", condition = NonEmptySingleLineString)
 
 val time = query("time", description = "the time", condition = DateValidator)
 
@@ -52,9 +52,7 @@ class ParametersTest : SparkTest() {
             IntTestResult(request[intparam]).ok
         }
 
-        val query = query("q", "the query", NonEmptyString)
-
-        "" GET "queriespath" inSummary "does a foo" withQuery query isHandledBy { TestResult(request[query]).ok }
+        "" GET "queriespath" inSummary "does a foo" withQuery q isHandledBy { TestResult(request[q]).ok }
 
         "" GET "queriespath2" with queries(int) isHandledBy { IntTestResult(request[int]).ok }
         "" GET "queriespath3" with queries(offset) isHandledBy { IntTestResult(request[offset]).ok }
@@ -96,6 +94,7 @@ class ParametersTest : SparkTest() {
     @Test
     fun `supports query parameters`() {
         whenPerform GET "/$root/queriespath?q=foo" expectBodyJson TestResult("foo")
+        whenPerform GET "/$root/queriespath?q=foo%0Abar" expectBodyJson TestResult("foo\nbar")
         whenPerform GET "/$root/queriespath?q=" expectBodyJson ErrorHttpResponse<TestResult, List<String>>(400, listOf("Query parameter `q` is invalid, expecting non empty string, got ``"))
         whenPerform GET "/$root/queriespath" expectBodyJson ErrorHttpResponse<TestResult, List<String>>(400, listOf("Required Query parameter `q` is missing"))
 
@@ -117,7 +116,7 @@ class ParametersTest : SparkTest() {
     @Test
     fun `supports header parameters`() {
         whenPerform GET "/$root/headerspath" withHeaders mapOf(qHead.name to "foo") expectBodyJson TestResult("foo")
-        whenPerform GET "/$root/headerspath" withHeaders mapOf(qHead.name to "") expectBodyJson ErrorHttpResponse<TestResult, List<String>>(400, listOf("Header parameter `q` is invalid, expecting non empty string, got ``"))
+        whenPerform GET "/$root/headerspath" withHeaders mapOf(qHead.name to "") expectBodyJson ErrorHttpResponse<TestResult, List<String>>(400, listOf("Header parameter `q` is invalid, expecting non empty single-line string, got ``"))
         whenPerform GET "/$root/headerspath" withHeaders mapOf() expectBodyJson ErrorHttpResponse<TestResult, List<String>>(400, listOf("Required Header parameter `q` is missing"))
 
         whenPerform GET "/$root/headerspath2" withHeaders mapOf(intHead.name to 3434) expectBodyJson IntTestResult(3434)
