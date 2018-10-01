@@ -1,12 +1,12 @@
 package com.emoticast.sparktswagger
 
 sealed class HttpResponse<T> {
-    abstract val code: Int
+    abstract val statusCode: Int
 
-    data class SuccessfulHttpResponse<T>(override val code: Int,
+    data class SuccessfulHttpResponse<T>(override val statusCode: Int,
                                          val body: T) : HttpResponse<T>()
 
-    data class ErrorHttpResponse<T, E>(override val code: Int,
+    data class ErrorHttpResponse<T, E>(override val statusCode: Int,
                                        val details: E) : HttpResponse<T>()
 }
 

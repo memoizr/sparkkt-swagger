@@ -111,7 +111,7 @@ class Router(val config: Config, val service: Service) {
                 invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }.let { Gson().toJson(badRequest<T, List<String>>(it)) }
             } else try {
                 block(RequestHandler(body, (headerParams + queryParams + pathParams), request, response)).let {
-                    response.status(it.code)
+                    response.status(it.statusCode)
                     response.type(ContentType.APPLICATION_JSON.value)
                     when (it) {
                         is HttpResponse.SuccessfulHttpResponse -> it.body.json
