@@ -3,6 +3,7 @@ package com.emoticast.sparktswagger
 import com.emoticast.sparktswagger.extensions.json
 import com.emoticast.sparktswagger.extensions.toHashMap
 import com.memoizr.assertk.expect
+import khttp.responses.Response
 import org.json.JSONObject
 import java.util.*
 
@@ -58,6 +59,11 @@ abstract class SparkTest {
 
         infix fun expectCode(code: Int) = apply {
             expect that response.statusCode isEqualTo code
+        }
+
+        infix fun expect(block: (Response) -> Unit): Expectation {
+            block(response)
+            return this
         }
 
         infix fun expectBodyJson(body: Any) = apply {

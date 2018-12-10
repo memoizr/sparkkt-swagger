@@ -1,6 +1,6 @@
 package com.emoticast.sparktswagger
 
-import com.emoticast.sparktswagger.documentation.ContentType
+import com.emoticast.sparktswagger.Format.*
 import com.emoticast.sparktswagger.extensions.json
 import com.emoticast.sparktswagger.extensions.print
 import com.google.gson.Gson
@@ -12,7 +12,7 @@ import kotlin.reflect.KClass
 
 class Router(val config: Config, val service: Service) {
     val http = this
-    data class EndpointBundle<T : Any>(val endpoint: Endpoint<T>, val response: KClass<*>, val function: (Request, Response) -> String)
+    data class EndpointBundle<T : Any>(val endpoint: Endpoint<T>, val response: KClass<*>, val function: (Request, Response) -> Any)
 
     val endpoints = mutableListOf<EndpointBundle<*>>()
 
@@ -110,12 +110,18 @@ class Router(val config: Config, val service: Service) {
                 response.status(400)
                 invalidParams.foldRight(emptyList<String>()) { error, acc -> acc + error }.let { Gson().toJson(badRequest<T, List<String>>(it)) }
             } else try {
-                block(RequestHandler(body, (headerParams + queryParams + pathParams), request, response)).let {
-                    response.status(it.statusCode)
-                    response.type(ContentType.APPLICATION_JSON.value)
-                    when (it) {
-                        is HttpResponse.SuccessfulHttpResponse -> it.body.json
-                        is HttpResponse.ErrorHttpResponse<*,*> -> it.json
+                block(RequestHandler(body, (headerParams + queryParams + pathParams), request, response)).let { httpResponse ->
+                    response.status(httpResponse.statusCode)
+                    when (httpResponse) {
+                        is HttpResponse.SuccessfulHttpResponse -> httpResponse.body.let {
+                            response.type(httpResponse._format.type)
+                            when (httpResponse._format) {
+                                Json -> it.json
+                                Format.OctetStream -> it
+                                Format.VideoMP4 -> it
+                            }
+                        }
+                        is HttpResponse.ErrorHttpResponse<*,*> -> httpResponse.json
                     }
                 }
             } catch (unregisteredException: UnregisteredParamException) {

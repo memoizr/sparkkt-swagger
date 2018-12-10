@@ -1,10 +1,14 @@
 package com.emoticast.sparktswagger
 
-sealed class HttpResponse<T> {
+import com.emoticast.sparktswagger.Format.*
+import com.emoticast.sparktswagger.HttpResponse.*
+
+sealed class HttpResponse<T>() {
     abstract val statusCode: Int
 
     data class SuccessfulHttpResponse<T>(override val statusCode: Int,
-                                         val body: T) : HttpResponse<T>()
+                                         val body: T,
+                                         val _format: Format = Json) : HttpResponse<T>()
 
     data class ErrorHttpResponse<T, E>(override val statusCode: Int,
                                        val details: E) : HttpResponse<T>()
@@ -16,3 +20,11 @@ val <T> T.created: HttpResponse<T> get() = HttpResponse.SuccessfulHttpResponse(2
 fun <T, E> badRequest(body: E, code: Int = 400) = HttpResponse.ErrorHttpResponse<T, E>(code, body)
 fun <T> forbidden(message: String) = HttpResponse.ErrorHttpResponse<T, String>(403, message)
 fun <T> notFound() = HttpResponse.ErrorHttpResponse<T, String>(404, "not found")
+
+fun <T> HttpResponse<T>.format(newFormat: Format) = if (this is SuccessfulHttpResponse) copy(_format = newFormat) else this
+
+enum class Format(val type: String) {
+    OctetStream("application/octect-streeam"),
+    Json("application/json"),
+    VideoMP4("video/mp4")
+}
