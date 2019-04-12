@@ -2,7 +2,7 @@ package com.emoticast.sparktswagger
 
 import com.emoticast.sparktswagger.documentation.Description
 import com.emoticast.sparktswagger.documentation.Visibility
-import com.emoticast.sparktswagger.documentation.Visibility.INTERNAL
+import com.emoticast.sparktswagger.documentation.Visibility.*
 import java.util.*
 
 val root = "home"
@@ -81,17 +81,13 @@ val ServerRouter: Router.() -> Unit = {
             queries(random, query, length, offset, query) isHandledBy
             getPathGreeting
 
-        "Run a cute test" POST
-                v1 / clips / clipId with queries(random,query, length, offset) with body<TestClass>() with headers(name) isHandledBy getGreetingBody
+        POST(v1 / clips / clipId) with queries(random,query, length, offset) with body<TestClass>() with headers(name) isHandledBy getGreetingBody
 
 //        "Run a cute test 2" POST
 //                v1 / clips / clipId withQuery queries(query, length, offset) withQuery headers(name) withQuery body<RequestBody>() isHandledBy getGreetingBody
 
-        "Run a cute test 2" PUT
-                v1 / clips / clipId with queries(query, length, offset) with headers(name) isHandledBy getPathGreeting
-
-        "Run a cute test 2" DELETE
-                v1 / clips / clipId with queries(query, length, offset) with headers(name) isHandledBy getPathGreeting
+        PUT(v1 / clips / clipId) with queries(query, length, offset) with headers(name) isHandledBy getPathGreeting
+        DELETE(v1 / clips / clipId) with queries(query, length, offset) with headers(name) isHandledBy getPathGreeting
 
 }
 

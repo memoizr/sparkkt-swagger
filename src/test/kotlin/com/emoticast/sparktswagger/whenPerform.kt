@@ -1,9 +1,11 @@
 package com.emoticast.sparktswagger
 
 import com.emoticast.sparktswagger.extensions.json
+import com.emoticast.sparktswagger.extensions.print
 import com.emoticast.sparktswagger.extensions.toHashMap
 import com.memoizr.assertk.expect
 import khttp.responses.Response
+import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 
@@ -67,7 +69,12 @@ abstract class SparkTest {
         }
 
         infix fun expectBodyJson(body: Any) = apply {
-            expect that response.jsonObject.toString() isEqualTo JSONObject(body.json).toString()
+            try {
+                expect that response.jsonObject.toString() isEqualTo JSONObject(body.json).toString()
+            } catch (e : JSONException) {
+                body.print()
+                throw e
+            }
         }
     }
 }

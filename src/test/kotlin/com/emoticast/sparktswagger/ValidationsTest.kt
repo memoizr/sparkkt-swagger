@@ -12,13 +12,15 @@ class ValidationsTest : SparkTest() {
     val stringSet = optionalQuery("stringset", "stringset", condition = StringSet)
 
     @Rule
-    @JvmField val rule = SparkTestRule(port) {
-        "" GET "foo" / id with queries(offset, allowInvalidQuery, stringSet) with headers(allowInvalidHeader) isHandledBy {
+    @JvmField
+    val rule = SparkTestRule(port) {
+        GET("foo" / id) with queries(offset, allowInvalidQuery, stringSet) with headers(allowInvalidHeader) isHandledBy {
             request[offset]
             request[allowInvalidHeader]
             request[allowInvalidQuery]
             request[stringSet]
-            "ok".ok }
+            "ok".ok
+        }
     }
 
     @Test
@@ -33,8 +35,8 @@ class ValidationsTest : SparkTest() {
 
         whenPerform GET "/$root/foo/11" withHeaders mapOf(stringSet.name to "foo") expectBody """"ok""""
         whenPerform GET "/$root/foo/11" withHeaders mapOf(stringSet.name to "foo,bar") expectBody """"ok""""
-        whenPerform GET "/$root/foo/11?stringset=foo"  expectBody """"ok""""
-        whenPerform GET "/$root/foo/11?stringset=foo%20bar"  expectBody """"ok""""
-        whenPerform GET "/$root/foo/11?stringset=foo,bar"  expectBody """"ok""""
+        whenPerform GET "/$root/foo/11?stringset=foo" expectBody """"ok""""
+        whenPerform GET "/$root/foo/11?stringset=foo%20bar" expectBody """"ok""""
+        whenPerform GET "/$root/foo/11?stringset=foo,bar" expectBody """"ok""""
     }
 }

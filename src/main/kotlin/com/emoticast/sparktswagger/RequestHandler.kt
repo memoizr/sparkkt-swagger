@@ -1,6 +1,5 @@
 package com.emoticast.sparktswagger
 
-//import com.emoticast.sparktswagger.extensions.gson
 import com.beust.klaxon.Klaxon
 import com.emoticast.sparktswagger.extensions.klaxon
 import com.emoticast.sparktswagger.extensions.parse

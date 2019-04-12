@@ -10,9 +10,9 @@ class FormatTest : SparkTest() {
 
     @Rule
     @JvmField val rule = SparkTestRule(port) {
-        "" GET "json" isHandledBy { "ok".ok }
-        "" GET "bytearray" isHandledBy { "ok".ok.format(Format.VideoMP4) }
-        "" GET "image" isHandledBy { val readBytes = File("squat.jpg").readBytes()
+        GET("json") isHandledBy { "ok".ok }
+        GET("bytearray") isHandledBy { "ok".ok.format(Format.VideoMP4) }
+        GET("image") isHandledBy { val readBytes = File("squat.jpg").readBytes()
             readBytes.size.print()
             readBytes.ok.format(Format.ImageJpeg) }
     }

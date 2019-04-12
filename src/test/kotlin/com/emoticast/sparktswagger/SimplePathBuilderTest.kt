@@ -15,66 +15,72 @@ class SimplePathBuilderTest : SparkTest() {
                 "returns a foo" isDescribedAs "" isHandledBy
                 { TestResult("get value").ok }
 
-        "foo" PUT "/foo" isHandledBy { TestResult("put value").created }
-        "foo" POST "/foo" isHandledBy { TestResult("post value").created }
-        "foo" DELETE "/foo" isHandledBy { TestResult("delete value").ok }
+        PUT("/foo") isHandledBy { TestResult("put value").created }
+        POST("/foo") isHandledBy { TestResult("post value").created }
+        DELETE("/foo") isHandledBy { TestResult("delete value").ok }
 
-        "foo" GET "/error" isHandledBy { if (false) TestResult("never happens").ok else badRequest("Something went wrong") }
-        "foo" GET "/forbidden" isHandledBy { if (false) TestResult("never happens").ok else forbidden("Forbidden") }
+        GET("/error") isHandledBy { if (false) TestResult("never happens").ok else badRequest("Something went wrong") }
+        GET("/forbidden") isHandledBy { if (false) TestResult("never happens").ok else forbidden("Forbidden") }
 
-        "foo" GET "noslash/bar" isHandledBy { TestResult("success").ok }
-        "foo" PUT "noslash/bar" isHandledBy { TestResult("success").ok }
-        "foo" POST "noslash/bar" isHandledBy { TestResult("success").ok }
-        "foo" DELETE "noslash/bar" isHandledBy { TestResult("success").ok }
+        GET("noslash/bar") isHandledBy { TestResult("success").ok }
+        PUT("noslash/bar") isHandledBy { TestResult("success").ok }
+        POST("noslash/bar") isHandledBy { TestResult("success").ok }
+        DELETE("noslash/bar") isHandledBy { TestResult("success").ok }
 
-        "foo" GET "infixslash" / "bar" isHandledBy { TestResult("success").ok }
-        "foo" PUT "infixslash" / "bar" isHandledBy { TestResult("success").ok }
-        "foo" POST "infixslash" / "bar" isHandledBy { TestResult("success").ok }
-        "foo" DELETE "infixslash" / "bar" isHandledBy { TestResult("success").ok }
+        GET("infixslash" / "bar") isHandledBy { TestResult("success").ok }
+        PUT("infixslash" / "bar") isHandledBy { TestResult("success").ok }
+        POST("infixslash" / "bar") isHandledBy { TestResult("success").ok }
+        DELETE("infixslash" / "bar") isHandledBy { TestResult("success").ok }
 
         "one" / {
-            "foo" GET "/a" isHandledBy { TestResult("get value").ok }
-            "foo" GET "/b" isHandledBy { TestResult("get value").ok }
+            GET("/a") isHandledBy { TestResult("get value").ok }
+            GET("/b") isHandledBy { TestResult("get value").ok }
             "two" / {
-                "foo" GET "/c" isHandledBy { TestResult("get value").ok }
+                GET("/c") isHandledBy { TestResult("get value").ok }
             }
         }
 
         "hey" / "there" / {
-            "foo" GET "/a" isHandledBy { TestResult("get value").ok }
-        }
-
-        "hey" / {
-            clipId / {
-                "foo" GET "/a" isHandledBy { TestResult("get value").ok }
-            }
+            GET("/a") isHandledBy { TestResult("get value").ok }
         }
 
         "v1" / {
             GET() isHandledBy { TestResult("get value").ok }
             http GET clipId isHandledBy { TestResult("get value").ok }
-            "foo" GET "one" / clipId isHandledBy { TestResult("get value").ok }
+            GET("one" / clipId) isHandledBy { TestResult("get value").ok }
         }
 
         GET("params1" / clipId / "params2" / otherPathParam) isHandledBy { TestResult("${request[clipId]}${request[otherPathParam]}").ok }
 
-//        "params3" / {
-//            clipId / {
-//                "params4" / {
-//                    otherPathParam / {
-//                        GET() isHandledBy { TestResult("${request[clipId]}${request[otherPathParam]}").ok }
-//                    }
-//                }
-//            }
-//        }
-
 
         GET() isHandledBy { TestResult("get value").ok }
+
+
+        "hey" / {
+            clipId / {
+                GET("/a").isHandledBy {
+                    TestResult("get value").ok
+                }
+                "level2" / {
+                    otherPathParam / {
+                        "nope" / {
+                            GET().isHandledBy {
+                                request[clipId]
+                                request[otherPathParam]
+                                TestResult("get value").ok
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
 
     @Test
     fun `supports nested routes`() {
+        whenPerform GET "/$root/hey/123/level2/3459/nope" expectBodyJson TestResult("get value") expectCode 200
+
         whenPerform GET "/$root/one/a" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/one/b" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/one/two/c" expectBodyJson TestResult("get value") expectCode 200
@@ -86,6 +92,7 @@ class SimplePathBuilderTest : SparkTest() {
         whenPerform GET "/$root/v1/one/123" expectBodyJson TestResult("get value") expectCode 200
         whenPerform GET "/$root/v1" expectBody TestResult("get value").json expectCode 200
         whenPerform GET "/$root" expectBody TestResult("get value").json expectCode 200
+
     }
 
     @Test

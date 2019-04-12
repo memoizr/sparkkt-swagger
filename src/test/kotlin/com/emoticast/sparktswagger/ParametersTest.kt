@@ -1,6 +1,6 @@
 package com.emoticast.sparktswagger
 
-import com.emoticast.sparktswagger.HttpResponse.ErrorHttpResponse
+import com.emoticast.sparktswagger.HttpResponse.*
 import com.emoticast.sparktswagger.documentation.Visibility
 import com.emoticast.sparktswagger.extensions.json
 import org.junit.Rule
@@ -45,29 +45,29 @@ class ParametersTest : SparkTest() {
     @Rule
     @JvmField
     val rule = SparkTestRule(port) {
-        "" GET "stringpath" / stringParam isHandledBy { TestResult(request[stringParam]).ok }
-        "" GET "intpath" / intparam isHandledBy { IntTestResult(request[intparam]).ok }
+        GET("stringpath" / stringParam) isHandledBy { TestResult(request[stringParam]).ok }
+        GET("intpath" / intparam) isHandledBy { IntTestResult(request[intparam]).ok }
 
-        "" GET "intpath2" / intparam / "end" isHandledBy {
+        GET("intpath2" / intparam / "end") isHandledBy {
             IntTestResult(request[intparam]).ok
         }
 
-        "" GET "queriespath" inSummary "does a foo" withQuery q isHandledBy { TestResult(request[q]).ok }
+        GET("queriespath") inSummary "does a foo" withQuery q isHandledBy { TestResult(request[q]).ok }
 
-        "" GET "queriespath2" with queries(int) isHandledBy { IntTestResult(request[int]).ok }
-        "" GET "queriespath3" with queries(offset) isHandledBy { IntTestResult(request[offset]).ok }
-        "" GET "queriespath4" with queries(limit) isHandledBy { NullableIntTestResult(request[limit]).ok }
+        GET("queriespath2") with queries(int) isHandledBy { IntTestResult(request[int]).ok }
+        GET("queriespath3") with queries(offset) isHandledBy { IntTestResult(request[offset]).ok }
+        GET("queriespath4") with queries(limit) isHandledBy { NullableIntTestResult(request[limit]).ok }
 
-        "" GET "headerspath" with headers(qHead) isHandledBy { TestResult(request[qHead]).ok }
-        "" GET "headerspath2" with headers(intHead) isHandledBy { IntTestResult(request[intHead]).ok }
-        "" GET "headerspath3" with headers(offsetHead) isHandledBy { NullableIntTestResult(request[offsetHead]).ok }
-        "" GET "headerspath4" with headers(limitHead) isHandledBy { NullableIntTestResult(request[limitHead]).ok }
+        GET("headerspath") with headers(qHead) isHandledBy { TestResult(request[qHead]).ok }
+        GET("headerspath2") with headers(intHead) isHandledBy { IntTestResult(request[intHead]).ok }
+        GET("headerspath3") with headers(offsetHead) isHandledBy { NullableIntTestResult(request[offsetHead]).ok }
+        GET("headerspath4") with headers(limitHead) isHandledBy { NullableIntTestResult(request[limitHead]).ok }
 
-        "" GET "customParsing" with queries(time) isHandledBy { DateResult(request[time]).ok }
+        GET("customParsing") with queries(time) isHandledBy { DateResult(request[time]).ok }
 
-        "" GET "sneakyqueryparams" isHandledBy { TestResult(request.get(queryParam)).ok }
-        "" GET "sneakyheaderparams" isHandledBy { TestResult(request.get(headerParam)).ok }
-        "" GET "sneakypathparams/:path" isHandledBy { TestResult(request.get(pathParam)).ok }
+        GET("sneakyqueryparams") isHandledBy { TestResult(request.get(queryParam)).ok }
+        GET("sneakyheaderparams") isHandledBy { TestResult(request.get(headerParam)).ok }
+        GET("sneakypathparams/:path") isHandledBy { TestResult(request.get(pathParam)).ok }
 
         val function: Handler<BodyParam, BodyTestResult> = {
             val sealed = body.sealed
@@ -76,7 +76,7 @@ class ParametersTest : SparkTest() {
                 is SealedClass.Two -> 2
             }).ok
         }
-        "" POST "bodyparam" with body<BodyParam>() isHandledBy function
+        POST("bodyparam") with body<BodyParam>() isHandledBy function
     }
 
     @Test

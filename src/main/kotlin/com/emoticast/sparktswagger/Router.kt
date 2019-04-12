@@ -2,7 +2,6 @@ package com.emoticast.sparktswagger
 
 import com.emoticast.sparktswagger.Format.*
 import com.emoticast.sparktswagger.extensions.json
-import com.emoticast.sparktswagger.extensions.print
 import com.google.gson.Gson
 import spark.Request
 import spark.Response
@@ -10,97 +9,69 @@ import spark.Service
 import kotlin.reflect.KClass
 
 
-class Router(val config: Config, val service: Service) {
+class Router(val config: Config, val service: Service, private val pathParams: Set<PathParam<out Any>> = emptySet()) {
     val http = this
-    data class EndpointBundle<T : Any>(val endpoint: Endpoint<T>, val response: KClass<*>, val function: (Request, Response) -> Any)
-
     val endpoints = mutableListOf<EndpointBundle<*>>()
 
-    fun GET() = Endpoint(HTTPMethod.GET, null, null, "", emptySet(), emptySet(), emptySet(), Body(Nothing::class))
+    fun GET() = Endpoint(HTTPMethod.GET, null, null, "", pathParams, emptySet(), emptySet(), Body(Nothing::class))
     infix fun GET(path: String) = Endpoint(HTTPMethod.GET, null, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun GET(path: PathParam<out Any>) = GET("" / path)
     infix fun GET(path: ParametrizedPath) = Endpoint(HTTPMethod.GET, null, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
 
-    fun POST() = Endpoint(HTTPMethod.POST, null, null, "", emptySet(), emptySet(), emptySet(), Body(Nothing::class))
+    fun POST() = Endpoint(HTTPMethod.POST, null, null, "", pathParams, emptySet(), emptySet(), Body(Nothing::class))
     infix fun POST(path: String) = Endpoint(HTTPMethod.POST, null, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun POST(path: PathParam<out Any>) = POST("" / path)
     infix fun POST(path: ParametrizedPath) = Endpoint(HTTPMethod.POST, null, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
 
-    fun PUT() = Endpoint(HTTPMethod.PUT, null, null, "", emptySet(), emptySet(), emptySet(), Body(Nothing::class))
+    fun PUT() = Endpoint(HTTPMethod.PUT, null, null, "", pathParams, emptySet(), emptySet(), Body(Nothing::class))
     infix fun PUT(path: String) = Endpoint(HTTPMethod.PUT, null, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun PUT(path: PathParam<out Any>) = PUT("" / path)
     infix fun PUT(path: ParametrizedPath) = Endpoint(HTTPMethod.PUT, null, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
 
-    fun DELETE() = Endpoint(HTTPMethod.DELETE, null, null, "", emptySet(), emptySet(), emptySet(), Body(Nothing::class))
+    fun DELETE() = Endpoint(HTTPMethod.DELETE, null, null, "", pathParams, emptySet(), emptySet(), Body(Nothing::class))
     infix fun DELETE(path: String) = Endpoint(HTTPMethod.DELETE, null, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun DELETE(path: PathParam<out Any>) = DELETE("" / path)
     infix fun DELETE(path: ParametrizedPath) = Endpoint(HTTPMethod.DELETE, null, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
 
-    fun OPTIONS() = Endpoint(HTTPMethod.OPTIONS, null, null, "", emptySet(), emptySet(), emptySet(), Body(Nothing::class))
+    fun OPTIONS() = Endpoint(HTTPMethod.OPTIONS, null, null, "", pathParams, emptySet(), emptySet(), Body(Nothing::class))
     infix fun OPTIONS(path: String) = Endpoint(HTTPMethod.OPTIONS, null, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun OPTIONS(path: PathParam<out Any>) = OPTIONS("" / path)
     infix fun OPTIONS(path: ParametrizedPath) = Endpoint(HTTPMethod.OPTIONS, null, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
 
-    fun HEAD() = Endpoint(HTTPMethod.HEAD, null, null, "", emptySet(), emptySet(), emptySet(), Body(Nothing::class))
+    fun HEAD() = Endpoint(HTTPMethod.HEAD, null, null, "", pathParams, emptySet(), emptySet(), Body(Nothing::class))
     infix fun HEAD(path: String) = Endpoint(HTTPMethod.HEAD, null, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun HEAD(path: PathParam<out Any>) = HEAD("" / path)
     infix fun HEAD(path: ParametrizedPath) = Endpoint(HTTPMethod.HEAD, null, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
 
-    fun PATCH() = Endpoint(HTTPMethod.PATCH, null, null, "", emptySet(), emptySet(), emptySet(), Body(Nothing::class))
+    fun PATCH() = Endpoint(HTTPMethod.PATCH, null, null, "", pathParams, emptySet(), emptySet(), Body(Nothing::class))
     infix fun PATCH(path: String) = Endpoint(HTTPMethod.PATCH, null, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
     infix fun PATCH(path: PathParam<out Any>) = PATCH("" / path)
     infix fun PATCH(path: ParametrizedPath) = Endpoint(HTTPMethod.PATCH, null, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
-
-
-    infix fun String.GET(path: String) = Endpoint(HTTPMethod.GET, this, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
-    infix fun String.GET(path: PathParam<out Any>) = GET("" / path)
-    infix fun String.GET(path: ParametrizedPath) = Endpoint(HTTPMethod.GET, this, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
-
-    infix fun String.POST(path: String) = Endpoint(HTTPMethod.POST, this, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
-    infix fun String.POST(path: PathParam<out Any>) = POST("" / path)
-    infix fun String.POST(path: ParametrizedPath) = Endpoint(HTTPMethod.POST, this, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
-
-    infix fun String.PUT(path: String) = Endpoint(HTTPMethod.PUT, this, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
-    infix fun String.PUT(path: PathParam<out Any>) = PUT("" / path)
-    infix fun String.PUT(path: ParametrizedPath) = Endpoint(HTTPMethod.PUT, this, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
-
-    infix fun String.DELETE(path: String) = Endpoint(HTTPMethod.DELETE, this, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
-    infix fun String.DELETE(path: PathParam<out Any>) = DELETE("" / path)
-    infix fun String.DELETE(path: ParametrizedPath) = Endpoint(HTTPMethod.DELETE, this, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
-
-    infix fun String.OPTIONS(path: String) = Endpoint(HTTPMethod.OPTIONS, this, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
-    infix fun String.OPTIONS(path: PathParam<out Any>) = OPTIONS("" / path)
-    infix fun String.OPTIONS(path: ParametrizedPath) = Endpoint(HTTPMethod.OPTIONS, this, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
-
-    infix fun String.HEAD(path: String) = Endpoint(HTTPMethod.HEAD, this, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
-    infix fun String.HEAD(path: PathParam<out Any>) = HEAD("" / path)
-    infix fun String.HEAD(path: ParametrizedPath) = Endpoint(HTTPMethod.HEAD, this, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
-
-    infix fun String.PATCH(path: String) = Endpoint(HTTPMethod.PATCH, this, null, path.leadingSlash, emptySet(), emptySet(), emptySet(), Body(Nothing::class))
-    infix fun String.PATCH(path: PathParam<out Any>) = PATCH("" / path)
-    infix fun String.PATCH(path: ParametrizedPath) = Endpoint(HTTPMethod.PATCH, this, null, path.path.leadingSlash, path.pathParameters, emptySet(), emptySet(), Body(Nothing::class))
 
     operator fun String.div(path: String) = this.leadingSlash + "/" + path
     operator fun String.div(path: PathParam<out Any>) = ParametrizedPath(this + "/{${path.name}}", setOf(path))
 
     operator fun String.div(block: Router.() -> Unit) {
-        val router = Router(config, service)
+        val router = Router(config, service, pathParams)
         router.block()
         endpoints += router.endpoints.map { EndpointBundle(it.endpoint.copy(url = this.leadingSlash + it.endpoint.url), it.response, it.function) }
     }
 
     operator fun ParametrizedPath.div(block: Router.() -> Unit) {
-        val router = Router(config, service)
+        val router = Router(config, service, pathParams + this.pathParameters)
         router.block()
         router.endpoints += router.endpoints.map { EndpointBundle(it.endpoint.copy(url = this.path.leadingSlash + it.endpoint.url, pathParams = it.endpoint.pathParams + this.pathParameters), it.response, it.function) }
         endpoints += router.endpoints
     }
 
-    operator fun PathParam<out Any>.div(block: Router.() -> Unit)  {
-        val router = Router(config, service)
+    operator fun PathParam<out Any>.div(block: Router.() -> Unit) {
+        val router = Router(config, service, pathParams + this)
         router.block()
         val path = ParametrizedPath("/{$name}", setOf(this))
-        endpoints += router.endpoints.map { EndpointBundle(it.endpoint.copy(url = path.path.leadingSlash + it.endpoint.url), it.response, it.function) }
+        endpoints += router.endpoints.map {
+            val url = path.path.leadingSlash + it.endpoint.url
+            EndpointBundle(it.endpoint.copy(url = url, pathParams = it.endpoint.pathParams + this.copy(url)), it.response, it.function)
+        }
     }
 
     inline infix fun <B : Any, reified T : Any> Endpoint<B>.isHandledBy(noinline block: RequestHandler<B>.() -> HttpResponse<T>): Endpoint<B> {
@@ -122,7 +93,7 @@ class Router(val config: Config, val service: Service) {
                                 Format.ImageJpeg -> it
                             }
                         }
-                        is HttpResponse.ErrorHttpResponse<*,*> -> httpResponse.json
+                        is HttpResponse.ErrorHttpResponse<*, *> -> httpResponse.json
                     }
                 }
             } catch (unregisteredException: UnregisteredParamException) {
@@ -138,11 +109,13 @@ class Router(val config: Config, val service: Service) {
         }
         return this
     }
+
+    data class EndpointBundle<T : Any>(val endpoint: Endpoint<T>, val response: KClass<*>, val function: (Request, Response) -> Any)
 }
 
 data class ParametrizedPath(val path: String, val pathParameters: Set<PathParam<out Any>>) {
     operator fun div(path: String) = copy(path = this.path + "/" + path)
-    operator fun div(path: PathParam<out Any>) = copy(path = this.path + "/" + "{${path.name}}", pathParameters = pathParameters+path).print()
+    operator fun div(path: PathParam<out Any>) = copy(path = this.path + "/" + "{${path.name}}", pathParameters = pathParameters + path)
 }
 
 val String.leadingSlash get() = if (!startsWith("/")) "/" + this else this

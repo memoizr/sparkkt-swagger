@@ -43,5 +43,6 @@ open class SparkTestRule(port: Int, val router: Router.() -> Unit = ServerRouter
 
     override fun before() {
         server.setRoutes(router)
+        server.http.awaitInitialization()
     }
 }
