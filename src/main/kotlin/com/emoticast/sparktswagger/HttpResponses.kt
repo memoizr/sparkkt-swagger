@@ -26,5 +26,6 @@ fun <T> HttpResponse<T>.format(newFormat: Format) = if (this is SuccessfulHttpRe
 enum class Format(val type: String) {
     OctetStream("application/octect-streeam"),
     Json("application/json"),
+    ImageJpeg("image/jpeg"),
     VideoMP4("video/mp4")
 }

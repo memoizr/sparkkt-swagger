@@ -119,6 +119,7 @@ class Router(val config: Config, val service: Service) {
                                 Json -> it.json
                                 Format.OctetStream -> it
                                 Format.VideoMP4 -> it
+                                Format.ImageJpeg -> it
                             }
                         }
                         is HttpResponse.ErrorHttpResponse<*,*> -> httpResponse.json
