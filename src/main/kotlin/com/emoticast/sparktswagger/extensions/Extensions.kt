@@ -5,6 +5,7 @@ import com.beust.klaxon.JsonObject
 import com.beust.klaxon.JsonValue
 import com.beust.klaxon.Klaxon
 import com.emoticast.sparktswagger.Sealed
+import com.google.gson.Gson
 import java.io.StringReader
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
@@ -21,9 +22,10 @@ fun <T : Any?> T.print(): T = this.apply {
 }
 
 class MyConverter<out T: Sealed> : Converter {
+    private val gson = Gson()
     override fun canConvert(cls: Class<*>) = Sealed::class.java.isAssignableFrom(cls)
 
-    override fun toJson(value: Any): String = Klaxon().toJsonString(value)
+    override fun toJson(value: Any): String = gson.toJson(value)
 
     override fun fromJson(jv: JsonValue): T {
         val stringRep = jv.obj?.toJsonString()

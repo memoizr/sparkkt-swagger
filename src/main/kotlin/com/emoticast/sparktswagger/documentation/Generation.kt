@@ -75,11 +75,22 @@ data class Spec(val spec: String, val router: Router) {
 
     fun writeDocsToStaticFolder() {
         val dest = "/tmp/swagger-ui" + "/docs"
+        copyResourceToFile("favicon-16x16.png", dest)
+        copyResourceToFile("favicon-32x32.png", dest)
         copyResourceToFile("index.html", dest)
+        copyResourceToFile("oauth2-redirect.html", dest)
         copyResourceToFile("swagger-ui.css", dest)
+        copyResourceToFile("swagger-ui.css.map", dest)
         copyResourceToFile("swagger-ui.js", dest)
+        copyResourceToFile("swagger-ui.js.map", dest)
         copyResourceToFile("swagger-ui-bundle.js", dest)
+        copyResourceToFile("swagger-ui-bundle.js.map", dest)
+        copyResourceToFile("swagger-ui-es-bundle.js", dest)
+        copyResourceToFile("swagger-ui-es-bundle.js.map", dest)
+        copyResourceToFile("swagger-ui-es-bundle-core.js", dest)
+        copyResourceToFile("swagger-ui-es-bundle-core.js.map", dest)
         copyResourceToFile("swagger-ui-standalone-preset.js", dest)
+        copyResourceToFile("swagger-ui-standalone-preset.js.map", dest)
         writeToFile(spec, "$dest/spec.json")
     }
 }

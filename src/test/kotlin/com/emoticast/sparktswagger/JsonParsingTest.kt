@@ -1,7 +1,10 @@
 package com.emoticast.sparktswagger
 
+import com.beust.klaxon.Klaxon
+import com.emoticast.sparktswagger.extensions.json
 import com.emoticast.sparktswagger.extensions.parseJson
 import com.emoticast.sparktswagger.extensions.print
+import com.google.gson.Gson
 import com.memoizr.assertk.expect
 import org.junit.Test
 
