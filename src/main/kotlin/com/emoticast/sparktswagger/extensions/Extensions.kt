@@ -20,7 +20,7 @@ fun <T : Any?> T.print(): T = this.apply {
     println("$this at $className.$methodName($fileName:$lineNumber)")
 }
 
-val myConverter = object <T : Sealed> : Converter {
+class MyConverter<out T: Sealed> : Converter {
     override fun canConvert(cls: Class<*>) = Sealed::class.java.isAssignableFrom(cls)
 
     override fun toJson(value: Any): String = Klaxon().toJsonString(value)
@@ -37,6 +37,25 @@ val myConverter = object <T : Sealed> : Converter {
         return Klaxon().let { it.fromJsonObject(it.parser(subtype).parse(StringReader(stringRep)) as JsonObject, subtype!!.java, subtype!!)!! as T }
     }
 }
+val myConverter = MyConverter<Sealed>()
+
+//val myConverter = object <T : Sealed> : Converter {
+//    override fun canConvert(cls: Class<*>) = Sealed::class.java.isAssignableFrom(cls)
+//
+//    override fun toJson(value: Any): String = Klaxon().toJsonString(value)
+//
+//    override fun fromJson(jv: JsonValue): T {
+//        val stringRep = jv.obj?.toJsonString()
+//        val clazz = jv.propertyKClass?.jvmErasure!!
+//        val subtype = if (clazz.isFinal) clazz else {
+//            val nestedClasses = clazz.nestedClasses
+//            val subclasses = nestedClasses.filter { it.isFinal && it.isSubclassOf(clazz) }
+//            val type = jv.objString(Sealed::type.name)
+//            subclasses.find { it.simpleName == type }
+//        }
+//        return Klaxon().let { it.fromJsonObject(it.parser(subtype).parse(StringReader(stringRep)) as JsonObject, subtype!!.java, subtype!!)!! as T }
+//    }
+//}
 
 val klaxon = Klaxon().converter(myConverter)
 val Any.json: String get() = klaxon.toJsonString(this)

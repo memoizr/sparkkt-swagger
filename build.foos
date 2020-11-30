@@ -9,10 +9,12 @@ buildscript {
     }
 }
 
+plugins {
+    id kotlin
+}
+
 group 'com.emoticast'
 version '1.0'
-
-apply plugin: 'kotlin'
 
 repositories {
     mavenCentral()

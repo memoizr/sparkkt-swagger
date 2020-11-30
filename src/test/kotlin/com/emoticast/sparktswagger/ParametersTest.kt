@@ -110,7 +110,7 @@ class ParametersTest : SparkTest() {
         whenPerform GET "/$root/queriespath3" expectBody IntTestResult(30).json
 
         whenPerform GET "/$root/queriespath4?limit=42" expectBody NullableIntTestResult(42).json
-        whenPerform GET "/$root/queriespath4" expectBody "{}"
+        whenPerform GET "/$root/queriespath4" expectBody """{"result" : null}"""
     }
 
     @Test
@@ -132,8 +132,8 @@ class ParametersTest : SparkTest() {
         whenPerform GET "/$root/headerspath3" expectBody IntTestResult(666).json
 
         whenPerform GET "/$root/headerspath4" withHeaders mapOf(limitHead.name to 42) expectBody NullableIntTestResult(42).json
-        whenPerform GET "/$root/headerspath4" withHeaders mapOf(limitHead.name to "") expectBody "{}"
-        whenPerform GET "/$root/headerspath4" expectBody "{}"
+        whenPerform GET "/$root/headerspath4" withHeaders mapOf(limitHead.name to "") expectBody """{"result" : null}"""
+        whenPerform GET "/$root/headerspath4" expectBody  """{"result" : null}"""
     }
 
     val bodyParam = BodyParam(42, "hello", SealedClass.One(33))
