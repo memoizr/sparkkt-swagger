@@ -60,7 +60,8 @@ val myConverter = MyConverter<Sealed>()
 //}
 
 val klaxon = Klaxon().converter(myConverter)
-val Any.json: String get() = klaxon.toJsonString(this)
+val gson = Gson()
+val Any.json: String get() = gson.toJson(this)
 inline fun <reified T> T.toHashMap() = (klaxon.parser(T::class).parse(StringReader(this?.json)) as JsonObject).map
 
 inline fun <reified T : Any> String.parseJson(): T = try {
