@@ -3,6 +3,7 @@ package com.emoticast.sparktswagger.documentation
 import com.emoticast.sparktswagger.Parameter
 import com.emoticast.sparktswagger.Router
 import com.emoticast.sparktswagger.extensions.json
+import com.emoticast.sparktswagger.extensions.print
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.reflect.full.starProjectedType
@@ -16,7 +17,7 @@ fun Router.generateDocs(): Spec {
                     path.withOperation(
                             bundle.endpoint.httpMethod,
                             Operation(
-                                    tags = bundle.endpoint.url.split("/").drop(2).firstOrNull()?.let { listOf(it) },
+                                    tags = bundle.endpoint.url.split("/").drop(1).firstOrNull()?.let { listOf(it) },
                                     summary = bundle.endpoint.summary,
                                     description = bundle.endpoint.description,
                                     responses = emptyMap(),
