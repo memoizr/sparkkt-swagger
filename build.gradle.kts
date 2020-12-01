@@ -16,10 +16,10 @@ repositories {
     maven("https://jcenter.bintray.com")
 }
 dependencies {
-    api("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.10")
-    api("ch.qos.logback:logback-classic:1.1.7")
-    api("com.sparkjava:spark-core:2.9.3")
-    api("com.beust:klaxon:5.4")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.10")
+    implementation("ch.qos.logback:logback-classic:1.1.7")
+    implementation("com.sparkjava:spark-core:2.9.3")
+    implementation("com.beust:klaxon:5.4")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.10")
     implementation("com.google.code.gson:gson:2.8.5")

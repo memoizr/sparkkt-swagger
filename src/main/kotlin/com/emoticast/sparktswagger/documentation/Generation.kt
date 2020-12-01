@@ -3,7 +3,6 @@ package com.emoticast.sparktswagger.documentation
 import com.emoticast.sparktswagger.Parameter
 import com.emoticast.sparktswagger.Router
 import com.emoticast.sparktswagger.extensions.json
-import com.emoticast.sparktswagger.extensions.print
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.reflect.full.starProjectedType
